@@ -1,0 +1,39 @@
+*******************************************************************************************
+*http											***
+*******************************************************************************************
+chú ý \r tương đương <ctr+M>
+      \n tương đương <ctr+J>
+      1A tương đương <ctr+Z> 
+URL: https://miliohm.com/miliohmSIM800L.php
+Server: miliohm.com
+**********
+*get	**
+**********
+AT+CHTTPACT="www.miliohm.com",80 \r\n\r\n
++CHTTPACT: REQUEST
+GET http://miliohm.com/miliohmSIM800L.php HTTP/1.1\r\n
+Host: www.miliohm.com\r\n
+User-Agent: AT Command Tester\r\n
+Content-Length: 0\r\n
+\r or <ctr + M>
+\n or <ctr + J>
+\r or <ctr + M>
+\n or <ctr + J>
+<ctr+Z> or 1A(hex)
+OK
++CHTTPACT: DATA,287
+http/1.1 200 ok
+connection: keep-alive
+x-powered-by: php/7.1.33
+content-type: text/html; charset=utf-8
+content-length: 84
+date: wed, 23 sep 2020 08:38:56 gmt
+server: litespeed
+vary: user-agent
+
+Congratulation! your SIM800L http Request Test has been successfull!!! -miliohm.com-
++CHTTPACT: 0
+
+**********
+*Post	**
+**********

@@ -1789,9 +1789,6 @@ boolean Adafruit_FONA::postData(const char *server, uint16_t port, const char *c
   // Start HTTPS stack
   if (_type == SIM7500A | _type == SIM7500E || _type == SIM7600A || _type == SIM7600C || _type == SIM7600E) {
     getReply(F("AT+CHTTPSSTART")); // Don't check if true/false since it will return false if already started (not stopped before)
-
-  	// if (! sendCheckReply(F("AT+CHTTPSSTART"), F("+CHTTPSSTART: 0"), 10000))
-  	// 	return false;
   }
   else {
   	if (! sendCheckReply(F("AT+CHTTPSSTART"), ok_reply, 10000))
@@ -1817,12 +1814,9 @@ boolean Adafruit_FONA::postData(const char *server, uint16_t port, const char *c
 
 
   if (_type == SIM7500A | _type == SIM7500E || _type == SIM7600A || _type == SIM7600C || _type == SIM7600E) {
-    // sendParseReply(auxStr, F("+CHTTPSOPSE: "), &reply);
-    // if (reply != 0) return false;
-
+ 
     if (! sendCheckReply(auxStr, ok_reply, 10000))
       return false;
-
     readline(10000);
     DEBUG_PRINT(F("\t<--- ")); DEBUG_PRINTLN(replybuffer);
     if (strcmp(replybuffer, "+CHTTPSOPSE: 0") != 0) return false;
@@ -1832,12 +1826,6 @@ boolean Adafruit_FONA::postData(const char *server, uint16_t port, const char *c
       return false;
   }
   
-  // readline(10000);
-
-  // if (strstr(replybuffer, "+HTTPSOPSE: 0") == 0) {
-  //   return false;
-  // }
-
   DEBUG_PRINTLN(F("Waiting 1s to make sure it works..."));
   delay(1000);
 
@@ -1908,12 +1896,16 @@ boolean Adafruit_FONA::postData(const char *server, uint16_t port, const char *c
 
   if (replyLen > 0) {
     readRaw(replyLen);
+//     while(mySerial->read()>0)
+//    {
+//      Serial.print(mySerial->read());
+//    }
     flushInput();
     DEBUG_PRINT("\t<--- start Get server response content"); 
     DEBUG_PRINTLN(replybuffer);
     DEBUG_PRINT("\t<--- end server response content\n");
   }
-  
+
   // Close HTTP/HTTPS session
   if (! sendCheckReply(F("AT+CHTTPSCLSE"), ok_reply, 10000))
     return false;
@@ -2894,7 +2886,6 @@ void Adafruit_FONA::flushInput() {
 
 uint16_t Adafruit_FONA::readRaw(uint16_t b) {
   uint16_t idx = 0;
-
   while (b && (idx < sizeof(replybuffer)-1)) {
     if (mySerial->available()) {
       replybuffer[idx] = mySerial->read();

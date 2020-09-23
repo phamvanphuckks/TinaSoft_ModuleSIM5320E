@@ -236,7 +236,7 @@ class Adafruit_FONA : public FONAStreamType {
   int8_t _rstpin;
   uint8_t _type;
 
-  char replybuffer[512];
+  char replybuffer[255];
   FONAFlashStringPtr apn;
   FONAFlashStringPtr apnusername;
   FONAFlashStringPtr apnpassword;
