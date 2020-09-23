@@ -1,0 +1,122 @@
+AT+CHTTPSSEND
+
+AT+CHTTPACT="httpbin.org",80,1
+
+AT+CHTTPSOPSE="httpbin.org",80,1
+AT+CHTTPACT="httpbin.org",80
+
+AT+CHTTPSSEND=35
+
+GET http://httpbin.org/get HTTP/1.1
+
+AT+CHTTPSRECV = 249
+AT
+AT+CSOCKSETPN=1
+AT+CIPMODE=0
+AT+NETOPEN=,,1
+AT+IPADDR
+AT+CHTTPSSTART
+AT+CHTTPSOPSE="httpbin.org", 80,1
+AT+CHTTPSSEND=19
+GET /get HTTP/1.1
+AT+CHTTPSRECV=19
+
+AT+CHTTPSSTATE
+-------------------------------
+gửu lên trang http test.
+
+chương 16.5, 16.6, 16.7
+http test : https://miliohm.com/miliohmSIM800L.php
+https://miliohm.com/getData.php?data=99
+
+Set Connection to GPRS :
+AT+SAPBR=3,1,"Contype","GPRS"﻿
+
+Set the APN, username and password.
+AT+CSTT="3gprs","3gprs","3gprs"
+
+Enable the GPRS
+AT+SAPBR=1,1﻿
+
+Check if we already got IP Adress
+AT+SAPBR=2,1
+
+Enabling HTTP mode :
+AT+HTTPINIT﻿
+
+OPTIONAL, If you are using or SLL use :
+AT+HTTPSSL=1﻿
+
+Setting HTTP bearer profile :
+AT+HTTPPARA="CID",1
+
+Give URL of website we want to access :
+AT+HTTPPARA="URL","https://miliohm.com/miliohmSIM800L.php"﻿
+
+Start HTTP GET Session :
+AT+HTTPACTION=0﻿
+
+Read the content of webpage :
+AT+HTTPREAD
+
+Terminate the session :
+AT+HTTPTERM
+------------------------
+AT+CHTTPSSTART
+AT+CHTTPSSTOP : stop http
+AT+CHTTPSOPSE="host","port","servertype"
+AT+CHTTPSOPSE="htts.pbin.org",80,1
+AT+CHTTPSCLSE
+
+AT+CHTTPSSEND=? // read
+AT+CHTTPSSEND=88
+GET/HTTP/1.1
+host:httpbin.org
+GET http://httpbin.org/get HTTP/1.1
+
+------------------------------------------------
+Sending AT query..
+AT
+
+OK
+Successfull response for AT query..
+
+Enabling echo and verbose mode
+ATE1V1
+
+OK
+
+Sending AT query..
+AT
+
+OK
+Successfull response for AT query..
+
+AT+CGMM
+
+SIMCOM_SIM5320E
+
+OK
+Model Number : SIMCOM_SIM5320E
+Enabling echo and verbose mode
+ATE1V1
+
+OK
+AT+CGMI
+
+SIMCOM INCORPORATED
+
+OK
+Manufacturer : SIMCOM INCORPORATED
+AT+CGMM
+
+SIMCOM_SIM5320E
+
+OK
+Model Number : SIMCOM_SIM5320E
+AT+CGMI
+
+SIMCOM INCORPORATED
+
+OK
+Manufacturer : SIMCOM INCORPORATED
