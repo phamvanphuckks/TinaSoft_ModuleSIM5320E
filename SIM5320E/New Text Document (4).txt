@@ -1,0 +1,39 @@
+//This program is for a SIM5320A connection using TeraTerm (I am running this through an Arduino Uno that has been uploaded with a AT port-through script). The items in brackets are the keystrokes I used to make the request run. The information after -> is the expected result.
+
+
+//SETUP
+AT+CGDCONT=1,"IP","INSERT_YOUR_APN","0.0.0.0" (return) -> OK
+AT+CGSOCKCONT=1,"IP","INSERT_YOUR_APN" (return) -> OK
+AT+CSOCKSETPN=1 (return) -> OK
+
+//Start HTTPS session
+AT+CHTTPSSTART (return) -> OK
+
+//Open HTTPS session at server
+AT+CHTTPSOPSE="www.XXXXXXXXXXXXXXXX.com.au",80,1 (return) -> OK
+
+//Send request - NOTE that the 86 is crucial - it is the number of characters in what you want to send plus 6 (6 carriage return and line feeds)
+AT+CHTTPSSEND=86 (return) -> >
+GET /SensorE.php?temp=11111&EC=3333 HTTP/1.1 
+    (Ctrl M)
+    (Ctrl J)
+Host: www.XXXXXXXXXXXXXXXX.com.au:80 
+    (Ctrl M)
+    (Ctrl J)
+    (Ctrl M)
+    (Ctrl J) -> OK +CHTTPS: RECV EVENT
+
+//Receive request
+AT+CHTTPSRECV=4000 (return) -> lots of stuff we hope, but should contain the returned data from your website
+
+//Close session at server (but will automatically after it gets a nice recv)
+AT+CHTTPSCLSE (return) -> OK or error - it is ok if error pops up here
+
+//Stop the http service
+AT+CHTTPSSTOP (return) -> OK
+
+//Power down the module
+AT+CPOF
+-------------------------------------------------------------
+host: api.thingspeak.com
+url: GET /update?api_key=16XSXLCF7FFORJG6&field1=123459\r\nHTTP/1.1\r\nHost:api.thingspeak.com\r\nContent-Length:0\r\n\r\n

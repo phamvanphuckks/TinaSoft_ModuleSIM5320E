@@ -1,0 +1,131 @@
+
+serialAT.print(char(0x1A));
+AT+CPING="google.com",1
+
+------------------------------------------------------------------------
+log arduino
+12:19:22.988 -> FONA> g
+12:19:25.648 -> 	---> AT+NETCLOSE
+12:19:25.694 -> 	<--- +IP ERROR: Network is already closed
+12:19:25.742 -> Failed to turn off
+12:19:25.788 -> 
+12:19:25.788 -> ERROR
+12:19:25.788 -> FONA> G
+12:19:30.222 -> 	---> AT+CGATT=1
+12:19:30.222 -> 	<--- OK
+12:19:30.269 -> 	---> AT+CGSOCKCONT=1,"IP","v-internet"
+12:19:30.363 -> 	<--- OK
+12:19:30.409 -> 	---> AT+CIPMODE=1
+12:19:30.409 -> 	<--- OK
+12:19:30.456 -> 	---> AT+NETOPEN=,,1
+12:19:33.393 -> 	<--- Network opened
+12:19:33.438 -> FONA> 3
+12:19:35.870 -> 	---> AT+CHTTPSSTART
+12:19:35.908 -> 	<--- OK
+12:19:35.908 -> Waiting 1s to ensure connection...
+12:19:36.941 -> 	---> AT+CHTTPSOPSE="www.dweet.io",80,1
+12:19:38.616 -> 	<--- OK
+12:19:38.662 -> Waiting 1s to make sure it works...
+12:19:39.697 -> 	---> AT+CHTTPSSEND=81
+12:19:49.931 -> 	<--- >
+12:19:49.978 -> 	---> GET /dweet/for/861311006321235?temp=533.82&batt=3700 HTTP/1.1
+12:19:50.070 -> Host: dweet.io
+12:19:50.070 -> 
+12:19:50.070 -> 
+12:19:50.116 -> 	<--- OK
+12:19:51.144 -> 	---> AT+CHTTPSSEND
+12:19:51.190 -> 	<--- OK
+12:19:51.237 -> 	<--- +CHTTPSSEND: 0
+12:19:52.268 -> 	---> AT+CHTTPSRECV?
+12:19:52.315 -> 	<--- +CHTTPSRECV: LEN,378
+12:19:52.362 -> 	---> AT+CHTTPSRECV=378
+12:19:52.409 -> 	<--- OK
+12:19:52.877 -> 	<--- 
+12:19:52.877 -> +CHTTPSRECV: DATA,378
+12:19:52.923 -> HTTP/1.1 200 OK
+12:19:52.923 -> Access-Control-Allow-Origin: *
+12:19:52.963 -> Content-Type: application/json
+12:19:53.010 -> Content-Length: 213
+12:19:53.010 -> Date: Wed, 23 Sep 2020 05:19:51 GMT
+12:19:53.057 -> Connection: keep-alive
+12:19:53.057 -> 
+12:19:53.057 -> {"this":"succeeded","by":"dweeting","the":"dweet","with":{"thing
+12:19:53.151 -> 	---> AT+CHTTPSCLSE
+12:19:53.618 -> 	<--- OK
+12:20:03.852 -> 	<--- 
+12:20:03.889 -> 	---> AT+CHTTPSSTOP
+12:20:03.935 -> 	<--- OK
+12:20:03.935 -> Failed to complete HTTP/HTTPS request...
+12:20:03.982 -> FONA> 
+
+------------------------------------------------------------------------
+
+AT+CGDCONT=1,\"IP\",\"v-internet\",\"0.0.0.0\" // Define PDP context
+
+AT+CGSOCKCONT=1,\"IP\",\"v-internet\" // Define PDP socket context
+
+AT+NETOPEN // Open packet data network
+
+AT+CHTTPSSTART // Aquire HTTPS stack
+
+AT+CHTTPSOPSE=\"httpbin.org\",80,1 // Open HTTPS session
+
+AT+CHTTPSSEND=41 // Tell the SIMCOM you want to send a message of certain length
+
+GET /get/ HTTP/1.1
+Host: httpbin.org
+// (Any other list of http parameters you want)
+// Make sure that the length of the request matches what you stated above.
+
+AT+CHTTPSSEND // Tell the SIMCOM to send the message.
+
+// Wait for this from the module
++CHTTPS: RECV EVENT
+
+AT+CHTTPSRECV=1000 // Check the response. <length> defines how long the printout is. I normally say something like 1000 and just ignore the garbage.
+
+
+
+// bat GPRS
+
+//
+AT+CGDCONT=1,"IP","v-internet","0.0.0.0" // Define PDP context
+
+AT+CGSOCKCONT=1,"IP","v-internet" // Define PDP socket context
+
+AT+NETOPEN="TCP",80 // Open packet data network
+
+AT+CHTTPSSTART // Aquire HTTPS stack
+
+AT+CHTTPSOPSE="www.ardigital.net",80,1 // Open HTTPS session
+
+AT+CHTTPSSEND=89 // Tell the SIMCOM you want to send a message of certain length
+
+GET www.httpbin.org/get HTTP/1.1 
+
+GET /ip/rpi.html HTTP/1.1
+Host: www.ardigital.net
+User-Agent: MY WEB AGENT
+Content-Length: 0
+// (Any other list of http parameters you want)
+// Make sure that the length of the request matches what you stated above.
+
+AT+CHTTPSSEND // Tell the SIMCOM to send the message.
+
+// Wait for this from the module
++CHTTPS: RECV EVENT
+
+AT+CHTTPSRECV=1000 // Check the response. <length> defines how long the printout is. I normally say something like 1000 and just ignore the garbage.
+
+-----------------------------------------------------
+
+AT+CGATT=1\r\n
+AT+CGSOCKCONT=1,"IP","v-internet"\r\n
+AT+CIPMODE=1\r\n
+AT+NETOPEN=,,1\r\n
+
+AT+CHTTPSSTART
+AT+CHTTPACT="www.miliohm",80\r\n\r\n
+GET /miliohmSIM800L.php HTTP/1.1\r\n
+Host: miliohm.com\r\n\r\n
+<ctr+Z>

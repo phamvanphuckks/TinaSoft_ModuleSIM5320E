@@ -1,5 +1,0 @@
-AT : kiểm tra module SIM có hoạt động
-ATE1V1 : Enabling echo and verbose mode
-AT+CGMM : tên module SIM
-AT+CGMI : tên tổ chức
-AT+IPADDR : lấy địa chỉ IP

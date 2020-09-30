@@ -1,0 +1,7 @@
+1, 
+sử dụng lệnh AT+CHTTPACT:
+báo lỗi CHTTPACT: 237
+thêm \r\n\r\n vào cuối lệnh AT+CHTTPACT="server",80\r\n\r\n
+
+2,
+

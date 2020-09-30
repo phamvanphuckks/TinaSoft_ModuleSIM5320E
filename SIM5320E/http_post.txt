@@ -1,0 +1,54 @@
+*******************************************************************************************
+*http											***
+*******************************************************************************************
+chú ý \r tương đương <ctr+M>
+      \n tương đương <ctr+J>
+      1A tương đương <ctr+Z> 
+URL: https://miliohm.com/getData.php?data=99
+Server : www.miliohm.com
+**********
+*Post	**
+**********
+*netword
+AT+CGATT=1
+AT+CGSOCKCONT=1,"IP","v-internet"
+AT+CIPMODE=1
+AT+NETOPEN=,,1
+
+/*
+	AT+CHTTPSSTART
+*/
+AT+CHTTPACT="www.miliohm.com",80\r\n
+POST https://miliohm.com/getData.php HTTP/1.1\r\n
+Host: www.miliohm.com\r\n
+User-Agent: AT Command Tester\r\n
+Accept:*/*\r\n
+Content-Type: application/x-www-form-urlencoded\r\n
+Cache-Control: no-cache\r\n
+Accept-Charset: utf-8, us-ascii\r\n
+Pragma: no-cache\r\n
+Content-Length:7\r\n
+\r
+\n
+data=68\r\n
+\r
+\n
+<ctr+Z>
+OK
+
++CHTTPACT: DATA,202
+http/1.1 200 ok
+connection: keep-alive
+x-powered-by: php/7.1.33
+content-type: text/html; charset=utf-8
+content-length: 0
+date: wed, 23 sep 2020 09:12:25 gmt
+server: litespeed
+vary: user-agent
+
+
++CHTTPACT: 
+
+/*
+	AT+CHTTPSSTOP
+*/

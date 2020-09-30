@@ -1,0 +1,9 @@
+AT : kiểm tra module SIM có hoạt động
+ATE1V1 : Enabling echo and verbose mode
+AT+CGMM : tên module SIM
+AT+CGMI : tên tổ chức
+AT+IPADDR : lấy địa chỉ IP
+AT+CPING: : ping đến đâu đó để kiểm tra mạng
+	AT+CPING="google.com",1
+AT+CPINGSTOP: dừng ping
+AT+COPS?: Xem nhà mạng của SIM

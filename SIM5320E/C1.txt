@@ -1,0 +1,86 @@
+AT
+OK // Module is working
+
+AT+CGSOCKCONT=1,"IP","v-internet" 
+OK
+
+AT+CSOCKSETPN=1 // Not sure what this step is, but seems to need to happen according to the application note
+OK
+
+AT+CIPMODE=0 // Same again
+OK
+
+AT+NETOPEN=,,1
+
+Network opened
+
+OK // Opens the network connection via GPRS
+AT+IPADDR
+
++IPADDR: 10.146.130.153
+
+OK // Appears to successfully get a network address
+AT+CHTTPSSTART
+
+OK // Starts the HTTPS/HTTP stack
+AT+CHTTPSOPSE="www.iforce2d.net", 80,1
+
+OK // Opens a connection to the host on port 80
+AT+CHTTPSSEND=23    // Request to send 23 chars of data
+
+>GET /test.php HTTP/1.1    // Web page exists, displays the time in UTC
+
+OK  // Says OK
+AT+CHTTPSSEND
+
+OK  
+
++CHTTPSSEND: 0  // Says sent with no issue
+AT+CHTTPSSEND?  // However, I query it
+
++CHTTPSSEND: 0  // However has sent no chars!
+
+OK
+
++CHTTPSNOTIFY: PEER CLOSED
+AT+CHTTPSRECV? //Query if anything has been received?
+
++CHTTPSRECV: LEN,0  // Hasn't received anything!
+
+OK
+
+----------------------------------------------------------------------
+
+Network setup*
+
+AT+CGDCONT=1,"IP","v-internet","0.0.0.0"
+AT+CGSOCKCONT=1,"IP","v-internet"
+AT+CSOCKSETPN=1
+
+Start HTTP service You can stop and start service if it's not responding properly*
+
+AT+CHTTPSSTART
+AT+CHTTPACT="www.iforce2d.net",80
+HTTP GET request
+
+GET /test.php HTTP/1.1  <-- don't hit enter, instead hit the below 2 keys
+<Ctrl M>
+<Ctrl J>
+Host: www.iforce2d.net  <-- don't hit enter, instead hit the below 2 keys
+<Ctrl M>
+<Ctrl J>
+Connection: close  <-- don't hit enter, instead hit the below 4 keys. This is useful when connecting to REST APIs to download the the respective result only.
+<Ctrl M>
+<Ctrl J>
+<Ctrl M>
+<Ctrl J>
+
+To end the command and to receive results:
+
+<Ctrl Z>
+You will receive a lot of data here.
+
+Stop HTTP service*
+
+AT+CHTTPSCLSE
+AT+CHTTPSSTOP
