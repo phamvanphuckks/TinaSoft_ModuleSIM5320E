@@ -6,6 +6,7 @@
 #define SIM7600E_RX 10
 #define SIM7600E_TX 11
 #define serialMON Serial
+
 SoftwareSerial SIM7600E_SS = SoftwareSerial(SIM7600E_RX, SIM7600E_TX);
 
 #if defined(ARDUINO_ARCH_SAMD)
@@ -25,12 +26,24 @@ SoftwareSerial SIM7600E_SS = SoftwareSerial(SIM7600E_RX, SIM7600E_TX);
   __FlashStringHelper với tham số thì đối số truyền vào là F("")
 */
 
-SIM7600E::SIM7600E(long baud)
+SIM7600E::SIM7600E()
 {
-  BAUD = baud;
-  SIM7600E_SS.begin(BAUD);
   setUserAgent("Module SIM7600E");
   setHTTPSRedirect(0);
+}
+
+boolean SIM7600E::setupSIM(long baud)
+{
+  if(!setBaud(baud)) 
+    return false; 
+  if(!baudCheck())  
+    return false;
+  if(!setEcho(false))  
+    return false;
+  if(!getModemInfo()) 
+    return false;
+    
+  return true;
 }
 
 void SIM7600E::rstSIM()
@@ -44,27 +57,30 @@ void SIM7600E::rstSIM()
   delay(500);
 }
 
-void SIM7600E::getModemInfo()
+boolean SIM7600E::getModemInfo()
 {
   flushInput();
+  uint16_t t=0;
   String txt;
 #ifdef DEBUG 
   DEBUG_PRINT(F("\tAVR--->SIM:\t"));
   DEBUG_PRINTLN(F("ATI"));
 #endif
   SIM7600E_SS.println(F("ATI\r\n"));
-  while (!SIM7600E_SS.available())
+  readline(1000, true);
+  if(strstr(replybuffer, ok_reply))
   {
-  }
-  while (SIM7600E_SS.available())
-  {
-    txt = SIM7600E_SS.readString();
-  }
+    
 #ifdef DEBUG  
-  DEBUG_PRINT(F("\tAVR<---SIM:\t\n"));
-  DEBUG_PRINTLN(txt);
+  DEBUG_PRINTLN(replybuffer);
+  DEBUG_PRINT(F("\tAVR<---SIM:\t"));
+  DEBUG_PRINTLN(ok_reply);
   DEBUG_PRINTLN(F("\t----------------------------------"));
 #endif
+    return true;
+  }
+  else
+    return false;
 }
 
 boolean SIM7600E::setEcho(boolean status)
@@ -79,58 +95,76 @@ boolean SIM7600E::setEcho(boolean status)
   if(status==true) SIM7600E_SS.println(F("ATE1\r\n"));
   else  SIM7600E_SS.println(F("ATE0\r\n"));
 
-  readline(10, true);
-
+  readline(1000, true);
+  if(strstr(replybuffer, ok_reply))
+  {
+    strcpy(replybuffer, ok_reply);
 #ifdef DEBUG  
   DEBUG_PRINT(F("\tAVR<---SIM:\t"));
-  if(strstr(replybuffer, ok_reply)) strcpy(replybuffer, ok_reply);
   DEBUG_PRINTLN(replybuffer);
   DEBUG_PRINTLN(F("\t----------------------------------"));
 #endif
-//  return expectReply(ok_reply);
+    return true;
+  }
+  else
+    return false;
 }
 
 boolean SIM7600E::setBaud(long baud)
 {
   flushInput();
-  BAUD=baud;
-  sprintf(tempData,"AT+IPR=%d\r\n",BAUD);
+  for(int i=0; i<8; i++)
+  {
+    SIM7600E_SS.begin(baudrate_array[i]);
+    SIM7600E_SS.println("AT\r\n");
+    readline(1000);
+    if(strcmp(replybuffer, ok_reply) == 0) break;;
+    delay(100);
+  }
+  sprintf(tempdata,"AT+IPR=%d\r\n", baud);
 #ifdef DEBUG  
   DEBUG_PRINT(F("\tAVR--->SIM:\t"));
   DEBUG_PRINT(F("AT+IPR="));
   DEBUG_PRINTLN(baud);
 #endif
-  SIM7600E_SS.println(tempData); 
-  readline(10000, true);
+  SIM7600E_SS.println(tempdata); 
+  readline(1000, true);
+  if(strstr(replybuffer, ok_reply))
+  {
+    strcpy(replybuffer, ok_reply);
 #ifdef DEBUG
   DEBUG_PRINT(F("\tAVR<---SIM:\t")); 
-  if(strstr(replybuffer, ok_reply)) strcpy(replybuffer, ok_reply);
   DEBUG_PRINTLN(replybuffer);
   DEBUG_PRINTLN(F("\t----------------------------------"));
 #endif   
-  SIM7600E_SS.begin(BAUD);
+    SIM7600E_SS.begin(baud);
+    return true;
+  }
+  else
+    return false;
 }
+
 boolean SIM7600E::baudCheck()
 {
   flushInput();
-  String txt;
+
 #ifdef DEBUG  
   DEBUG_PRINT(F("\tAVR--->SIM:\t"));
-  DEBUG_PRINTLN(F("AT+IPREX?"));
+  DEBUG_PRINTLN(F("AT+IPR?"));
 #endif
-  SIM7600E_SS.println("AT+IPREX?\r\n");
-  while (!SIM7600E_SS.available())
+  SIM7600E_SS.println("AT+IPR?\r\n");
+  readline(1000, true);
+  if(strstr(replybuffer, ok_reply))
   {
-  }
-  while (SIM7600E_SS.available())
-  {
-    txt = SIM7600E_SS.readString();
-  }
+    strcpy(replybuffer, ok_reply);
 #ifdef DEBUG  
   DEBUG_PRINT(F("\tAVR<---SIM:\t"));
-  DEBUG_PRINTLN(txt);
+  DEBUG_PRINTLN(replybuffer);
   DEBUG_PRINTLN(F("\t----------------------------------"));
 #endif
+    return true;
+  }
+  return false;
 }
 
 bool SIM7600E::pushData(const char *url, const char *data)
@@ -182,12 +216,12 @@ boolean SIM7600E::HTTP_para(const char* parameterTag, const char* parameterVaule
 {
   flushInput();
   
-  sprintf(tempData,"AT+HTTPPARA=\"%s\",\"%s\"\r\n", parameterTag, parameterVaule);
+  sprintf(tempdata,"AT+HTTPPARA=\"%s\",\"%s\"\r\n", parameterTag, parameterVaule);
 #ifdef DEBUG
   DEBUG_PRINT(F("\tAVR--->SIM:\t"));
-  DEBUG_PRINTLN(tempData);
+  DEBUG_PRINTLN(tempdata);
 #endif
-  SIM7600E_SS.println(tempData);
+  SIM7600E_SS.println(tempdata);
   
   return expectReply(ok_reply);
 }
@@ -196,20 +230,20 @@ boolean SIM7600E::HTTP_data(const char* data, uint32_t maxTime)
 {
   flushInput();
 
-  sprintf(tempData,"AT+HTTPDATA=%d,%d\r\n", strlen(data), maxTime);
+  sprintf(tempdata,"AT+HTTPDATA=%d,%d\r\n", strlen(data), maxTime);
 #ifdef DEBUG
   DEBUG_PRINT(F("\tAVR--->SIM:\t"));
-  DEBUG_PRINTLN(tempData);
+  DEBUG_PRINTLN(tempdata);
 #endif
-  SIM7600E_SS.println(tempData);
+  SIM7600E_SS.println(tempdata);
    
   if(expectReply("DOWNLOAD")){ // wait for "DOWNLOAD"
-    sprintf(tempData,"\"%s\"\r\n", data);
+    sprintf(tempdata,"\"%s\"\r\n", data);
 #ifdef DEBUG
     DEBUG_PRINT("\tdata:");
-    DEBUG_PRINTLN(tempData);
+    DEBUG_PRINTLN(tempdata);
 #endif
-    SIM7600E_SS.println(tempData);
+    SIM7600E_SS.println(tempdata);
   }
   else
     return false;
@@ -221,12 +255,12 @@ boolean SIM7600E::HTTP_action(uint8_t method, int32_t timeout)
   flushInput();
   
   // Send request.
-  sprintf(tempData,"AT+HTTPACTION=%d",method);
+  sprintf(tempdata,"AT+HTTPACTION=%d",method);
 #ifdef DEBUG
   DEBUG_PRINT(F("\tAVR--->SIM:\t"));
-  DEBUG_PRINTLN(tempData);
+  DEBUG_PRINTLN(tempdata);
 #endif
-  SIM7600E_SS.println(tempData);
+  SIM7600E_SS.println(tempdata);
 
   if(!expectReply(ok_reply)) return false;
 
@@ -241,10 +275,8 @@ boolean SIM7600E::HTTP_action(uint8_t method, int32_t timeout)
 
 boolean SIM7600E::HTTP_readall(uint16_t datalen)
 {
-  getReply("AT+HTTPREAD");
-//  if (!parseReply("+HTTPREAD:", datalen, ',', 0))
-//    return false;
-
+  sprintf(tempdata,"AT+HTTPREAD=0,%d",datalen);
+  getReply(tempdata);
   return true;
 }
 
@@ -295,9 +327,9 @@ boolean SIM7600E::HTTP_POST_start(const char* url, const char* postData)
   DEBUG_PRINTLN(datalen);
   DEBUG_PRINTLN("\t----------------------------------");
 #endif  
-//  // HTTP response data
-//  if (!HTTP_readall(datalen))
-//    return false;
+  // HTTP response data
+  if (!HTTP_readall(datalen))
+    return false;
 
   return true;
 }
@@ -317,7 +349,8 @@ void SIM7600E::setHTTPSRedirect(boolean onoff)
   httpsredirect = onoff;
 }
 
-/********* HTTP HELPERS ****************************************/
+/********* HTTP verify responses message ****************************************/
+
 boolean SIM7600E::HTTP_setup(char *url)
 {
   // Handle any pending
@@ -405,7 +438,7 @@ uint8_t SIM7600E::readline(uint16_t timeout, boolean multiline)
       }
       replybuffer[replyidx] = c;
 #ifdef DEBUG
-      DEBUG_PRINT(c, HEX); DEBUG_PRINT("#"); DEBUG_PRINTLN(c);
+      //DEBUG_PRINT(c, HEX); DEBUG_PRINT("#"); DEBUG_PRINTLN(c);
 #endif
       replyidx++;
     }
@@ -425,12 +458,12 @@ uint8_t SIM7600E::getReply(const char *send, uint16_t timeout)
 {
   flushInput();
   
-  sprintf(tempData,"%s\r\n", send);
+  sprintf(tempdata,"%s\r\n", send);
 #ifdef DEBUG
   DEBUG_PRINT(F("\tAVR--->SIM:\t"));
-  DEBUG_PRINTLN(tempData);
+  DEBUG_PRINTLN(tempdata);
 #endif
-  SIM7600E_SS.println(tempData);
+  SIM7600E_SS.println(tempdata);
   uint8_t l = readline(timeout);
 #ifdef DEBUG  
   DEBUG_PRINT(F("\tAVR<---SIM:\t"));
@@ -472,7 +505,6 @@ boolean SIM7600E::parseReply(const char* toreply, char divider) {
 }
 
 boolean SIM7600E::expectReply(const char* reply, uint16_t timeout){
-
   readline(timeout);
 #ifdef DEBUG 
   DEBUG_PRINT(F("\tAVR<---SIM:\t")); 

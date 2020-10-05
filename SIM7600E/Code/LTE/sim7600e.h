@@ -17,9 +17,10 @@
 
 class SIM7600E{
   public:
-    SIM7600E(long baud);  
-    void  rstSIM();
-    void  getModemInfo();
+    SIM7600E();  
+    void rstSIM();
+    boolean getModemInfo();
+    boolean setupSIM(long baud);
     boolean pushData(const char* url, const char* data);
     boolean setEcho(boolean status);
     boolean baudCheck();
@@ -29,8 +30,8 @@ class SIM7600E{
     boolean HTTP_init();
     boolean HTTP_term();
     boolean HTTP_para(const char* parameterTag, const char* parameterVaule);
-    boolean HTTP_data(const char* data, uint32_t maxTime=10000);
-    boolean HTTP_action(uint8_t method, int32_t timeout=10000);
+    boolean HTTP_data(const char* data, uint32_t maxTime=1000);
+    boolean HTTP_action(uint8_t method, int32_t timeout=1000);
     boolean HTTP_readall(uint16_t datalen);
     
     // HTTP high level interface
@@ -40,24 +41,22 @@ class SIM7600E{
     void    HTTP_POST_end(void);
     boolean HTTP_setup(char *url);
     
-    // verify responses message
+    // HTTP verify responses message
     void setHTTPSRedirect(boolean onoff);
     void setUserAgent(const char *useragent);
-       
     void     flushInput();
     uint16_t readRaw(uint16_t b);
     uint8_t  readline(uint16_t timeout = TIMEOUT_MS, boolean multiline = false);
     uint8_t  getReply(const char *send, uint16_t timeout = TIMEOUT_MS);
-    
-    boolean expectReply(const char* reply, uint16_t timeout = 10000);
-    boolean sendCheckReply(const char* send, const char *reply, uint16_t timeout = TIMEOUT_MS);
-    boolean parseReply(const char* toreply, char divider);
+    boolean  expectReply(const char* reply, uint16_t timeout = 1000);
+    boolean  sendCheckReply(const char* send, const char *reply, uint16_t timeout = TIMEOUT_MS);
+    boolean  parseReply(const char* toreply, char divider);
     
   public:
     uint16_t stt, datalen; 
-    
+    uint32_t baudrate_array[8]={2400, 4800, 9600, 19200, 38400, 57600, 74880, 115200};
   private:
-    char replybuffer[255], tempData[255];
+    char replybuffer[255], tempdata[255];
     char *useragent;
     boolean httpsredirect;
     long BAUD;
