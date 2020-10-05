@@ -1,0 +1,115 @@
+------------------
+-tập lệnh HTTP   -
+------------------
+Nhớ thêm delay vào mỗi lệnh để nó có time thực hiện
+
+1,AT+HTTPINIT
+Khởi tạo dịch vụ HTTP server
+AT+HTTPINIT
+
+2,AT+HTTPTERM
+dừng dịch vụ HTTP server
+AT+HTTPTERM
+
+3,AT+HTTPPARA
+Cài đặt các thông số HTTP - ký hơn đọc tập lệnh
+AT+HTTPPARA=x,y
+
+4,AT+HTTPACTION
+Lự chọn phương thức POST hay GET
+
+
+5, AT+HTTPHEAD
+đọc header của server
+AT+HTTPHEAD
+
+6, AT+HTTPREAD
+đọc nội dung
+
+AT+HTTPREAD=vi tri bat đầu muốn đọc, vị trí cuối muốn đọc
+AT+HTTPREAD=0,100
+
+7,AT+HTTPDATA
+Ghi nội dung truyền lên server
+AT+HTTPDATA=x,y  		- x là độ dài, y là thời gian
+
+8,AT+HTTPSTATUS
+Kiểm tra trạng thái
+AT+HTTPSTATUS?
+
+9,AT+HTTPSCONT : cái này hay lắm
+Lưu nội dung HTTP application, khi mình reset 
+tự động cấu hình lại(gửi lại các lệnh AT cấu hình).
+
+AT+HTTPSCONT
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--------------------
+- thing speak	   -
+--------------------
+server:http://api.thingspeak.com/
+AT+HTTPINIT
+>OK
+AT+HTTPPARA="URL","https://api.thingspeak.com/update"
+>OK
+AT+HTTPDATA=34,10000
+api_key=OHYC1ECKZIXTL1VK&field1=99
+AT+HTTPACTION=1
+>OK
++HTTPACTION:0,201,1
+=> ghi gia tri toi thingspeak done
+
+Write a Channel Feed:
+GET https://api.thingspeak.com/update?api_key=OHYC1ECKZIXTL1VK&field1=0
+Read a Channel Feed
+GET https://api.thingspeak.com/channels/1165757/feeds.json?api_key=RKOF6Z31YODWLH7L&results=2
+Read a Channel Field
+GET https://api.thingspeak.com/channels/1165757/fields/1.json?api_key=RKOF6Z31YODWLH7L&results=2
+Read Channel Status Updates
+GET https://api.thingspeak.com/channels/1165757/status.json?api_key=RKOF6Z31YODWLH7L
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------
+-My server	    -
+---------------------
+URL: http://admin.breedlife.com/api/v1/data
+method: POST
+content-type: application/json
+{
+	"data": ["TR001", [[1, 1, 1], [2, 3, 4], [5, 6, 11], [234, 123, 13], [11, 123, 112]], 1, 41.2, 29, 48.1, 24, "11/11/2011 11:11:11"]
+}
+VPN: m-wap
+User: mms
+Pass: mms
+{"data":["TR001",[[8,8,8],[9,9,9],[9,9,9],[234,123,13],[11,123,112]],1,41.2,29,48.1,24,"11/11/2011 11:11:11"]}
+
+
+
+
+1,
+<AT+HTTPINIT
+>OK
+2,
+<AT+HTTPPARA="URL","http://admin.breedlife.com/api/v1/data"
+>OK
+3,
+<AT+HTTPPARA="CONTENT","application/json"
+>OK
+4,
+<AT+HTTPDATA=110,10000   chú ý hàm này post data lên server
+>DOWNLOAD
+<{"data":["TR001",[[8,8,8],[9,9,9],[9,9,9],[234,123,13],[11,123,112]],1,41.2,29,48.1,24,"11/11/2011 11:11:11"]}
+>OK
+5,
+<AT+HTTPACTION=1		chú ý 0:GET, 1:POST
+>+HTTPACTION:1,201,419		Chú ý 201:created,419: data length
+6,
+<AT+HTTPTERM
+>OK
+------------------------------------------------------------------------------------------------

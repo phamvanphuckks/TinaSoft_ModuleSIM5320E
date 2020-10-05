@@ -1,6 +1,7 @@
 ------------------
 -tập lệnh HTTP   -
 ------------------
+Nhớ thêm delay vào mỗi lệnh để nó có time thực hiện
 
 1,AT+HTTPINIT
 Khởi tạo dịch vụ HTTP server
@@ -36,79 +37,55 @@ AT+HTTPDATA=x,y  		- x là độ dài, y là thời gian
 Kiểm tra trạng thái
 AT+HTTPSTATUS?
 
-9,AT+HTTPSCONT
-Lưu nội dung HTTP application
+9,AT+HTTPSCONT : cái này hay lắm
+Lưu nội dung HTTP application, khi mình reset 
+tự động cấu hình lại(gửi lại các lệnh AT cấu hình).
 
 AT+HTTPSCONT
-
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 --------------------
 - thing speak	   -
 --------------------
+a, lấy trường data từ thingspeak
 server:http://api.thingspeak.com/
 AT+HTTPINIT
 >OK
-AT+HTTPPARA="URL","https://api.thingspeak.com/update"
+AT+HTTPPARA="URL","https://api.thingspeak.com/channels/1165757/feeds/last.txt"
 >OK
-AT+HTTPDATA=72,10000
-GET https://api.thingspeak.com/update?api_key=OHYC1ECKZIXTL1VK&field1=99
+
 AT+HTTPACTION=0
 >OK
-+HTTPACTION:0,200,1
-=> ghi gia tri toi thingspeak done
++HTTPACTION:0,200,64
 
-********************************************************************************************************************************************************************************
+<AT+HTTPREAD=0,64
+>OK
++HTTPREAD: DATA,64
+{"creat_at":2020-09-30T11:02:26Z","entry_id":9,"field1":"35"}
++HTTPREAD:0
+
+b, ghi vào trường data trên thingspeak
+AT+HTTPINIT
+>OK
+AT+HTTPPARA="URL","https://api.thingspeak.com/update?api_key=OHYC1ECKZIXTL1VK&field1=96"
+>OK
+
+AT+HTTPACTION=0
+>OK
++HTTPACTION:0,200,64
+
+
 Write a Channel Feed:
-GET https://api.thingspeak.com/update?api_key=OHYC1ECKZIXTL1VK&field1=0
+GET https://api.thingspeak.com/update?api_key=OHYC1ECKZIXTL1VK&field1=96
 Read a Channel Feed
 GET https://api.thingspeak.com/channels/1165757/feeds.json?api_key=RKOF6Z31YODWLH7L&results=2
 Read a Channel Field
 GET https://api.thingspeak.com/channels/1165757/fields/1.json?api_key=RKOF6Z31YODWLH7L&results=2
 Read Channel Status Updates
 GET https://api.thingspeak.com/channels/1165757/status.json?api_key=RKOF6Z31YODWLH7L
-
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
----------------------
--My server	    -
----------------------
-URL: http://admin.breedlife.com/api/v1/data
-method: POST
-content-type: application/json
-{
-	"data": ["TR001", [[1, 1, 1], [2, 3, 4], [5, 6, 11], [234, 123, 13], [11, 123, 112]], 1, 41.2, 29, 48.1, 24, "11/11/2011 11:11:11"]
-}
-VPN: m-wap
-User: mms
-Pass: mms
-{"data":["TR001",[[8,8,8],[9,9,9],[9,9,9],[234,123,13],[11,123,112]],1,41.2,29,48.1,24,"11/11/2011 11:11:11"]}
 
-
-
-
-1,
-<AT+HTTPINIT
->OK
-2,
-<AT+HTTPPARA="URL","http://admin.breedlife.com/api/v1/data"
->OK
-3,
-<AT+HTTPPARA="CONTENT","application/json"
->OK
-4,
-<AT+HTTPDATA=110,10000   chú ý hàm này post data lên server
->DOWNLOAD
-<{"data":["TR001",[[8,8,8],[9,9,9],[9,9,9],[234,123,13],[11,123,112]],1,41.2,29,48.1,24,"11/11/2011 11:11:11"]}
->OK
-5,
-<AT+HTTPACTION=1		chú ý 0:GET, 1:POST
->+HTTPACTION:1,201,419		Chú ý 201:created,419: data length
-6,
-<AT+HTTPTERM
->OK
-------------------------------------------------------------------------------------------------
