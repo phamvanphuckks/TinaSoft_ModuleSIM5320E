@@ -60,8 +60,7 @@ void SIM7600E::rstSIM()
 boolean SIM7600E::getModemInfo()
 {
   flushInput();
-  uint16_t t=0;
-  String txt;
+
 #ifdef DEBUG 
   DEBUG_PRINT(F("\tAVR--->SIM:\t"));
   DEBUG_PRINTLN(F("ATI"));
@@ -86,7 +85,6 @@ boolean SIM7600E::getModemInfo()
 boolean SIM7600E::setEcho(boolean status)
 {
   flushInput();
-  String txt;
 #ifdef DEBUG  
   DEBUG_PRINT(F("\tAVR--->SIM:\t"));
   DEBUG_PRINT(F("ATE"));
