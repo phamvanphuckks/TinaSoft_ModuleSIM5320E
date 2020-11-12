@@ -1,0 +1,25 @@
+1, ACS712 - chuyển dòng điện cần đo thành giá trị hiệu điện thế.
+
+Đo dòng điện​​ DC​
+Khi đo DC phải mắc tải nối tiếp Ip+ và Ip- đúng chiều , dòng điện đi từ Ip+ đến Ip- 
+để Vout ra mức điện thế 2.5 – 5V tương ứng dòng 0 – 30A, nếu mắc ngược Vout sẽ 
+ra điện thế 2.5V đến 0V tương ứng với 0A đến -30A.
+
+Cấp nguồn 5v cho module khi chưa có dòng Ip (chưa có tải mắc nối tiếp với domino) , 
+thì Vout=2.5v. khi dòng Ip( dòng của tải) bằng 5A thì Vout=5v, 
+Vout sẽ tuyến tính với dòng Ip , trong khoản 2.5V đến 5V tương ứng với dòng 0 đến 30A.
+Để kiểm tra ta dùng đồng hồ VOM thang đo DC đo điện thế Vout.
+
+=> Vout - Analog
+dòng điện IP+ -> IP- : 2.5 - 5V : 0 ->  30A
+dòng điện IP- -> IP+ : 2.5 - 0V : 0 -> -30A
+Độ nhạy đầu ra từ 63-190mV/A.
+Độ nhạy: 180 – 190 mV/A.
+
+Thư viện Robojax
+
+Thay đổi thuộc tính trong thư viện LiquidCrystal_I2C
+chuyên phương thức private thành public.
+
+
+
