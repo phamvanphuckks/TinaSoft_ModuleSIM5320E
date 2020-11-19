@@ -31,6 +31,4 @@ class NTC10kSensor
     float _RT, _VR, _ln, _Tc, _T0, _VRT, _Vo;
 };
 
-
-
 #endif

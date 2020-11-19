@@ -6,7 +6,7 @@
 #include <Arduino.h>
 #include "AppDebug.h"
 
-// 53 la tren board - khi dung chip atmega2560 la 19
+// 53 la tren board - khi dung chip atmega2560 mach thuc y la 19
 #define SD_ChipSelectPin 53 
 
 class SDCard
@@ -17,7 +17,7 @@ class SDCard
     void SD_Init(void);
     void SD_openFile(char *nameFile, byte method);
     void SD_closeFile(char *nameFile);
-    void SD_writeFile(char *nameFile, char *bufw);
+    void SD_writeFile(char *nameFile, char *bufw); // ghi vao so float => myFile.print();
     void SD_readFile(char *bufr, int len);
     void SD_removeFile(char *nameFile);
     void SD_removeDir(char *nameDir);

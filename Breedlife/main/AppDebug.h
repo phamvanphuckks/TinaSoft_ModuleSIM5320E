@@ -1,8 +1,8 @@
 /**
  * Author: Tinasoft.vn
  */
-#ifndef APP_DEBUG_H
-#define APP_DEBUG_H
+#ifndef __APPDEBUG_H__
+#define __APPDEBUG_H__
 
 #define DEBUG
 

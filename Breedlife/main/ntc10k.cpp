@@ -1,4 +1,5 @@
 #include "ntc10k.h"
+
 NTC10kSensor::NTC10kSensor()
 {
   _T0 = 25 + 273.15; 

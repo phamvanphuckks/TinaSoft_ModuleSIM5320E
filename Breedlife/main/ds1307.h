@@ -13,6 +13,7 @@ class DS1307Time
     char RTC_getDateTime(char* datetime);
     char RTC_getDate(char* date);
     char RTC_getTime(char* time);
+    void RTC_getTime(int *t_hour, int *t_minute, int *t_second);
   private:
     RTC_DS1307 RTC;
     DateTime   RTC_Datetime;

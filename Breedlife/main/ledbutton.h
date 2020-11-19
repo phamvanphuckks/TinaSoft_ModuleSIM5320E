@@ -17,6 +17,9 @@
 #define LED_YELLOW  25
 #define LED_GREEN   26
 
+#define LEDON(x)        digitalWrite(x, HIGH);
+#define LEDOOFF(x)      digitalWrite(x, LOW);
+
 extern bool  BUTTON1_Flag, BUTTON2_Flag, BUTTON3_Flag, BUTTON4_Flag; 
 
 void Init_Buzz(void);

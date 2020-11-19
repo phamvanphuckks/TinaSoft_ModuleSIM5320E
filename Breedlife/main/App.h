@@ -1,3 +1,6 @@
+/**
+ * Author: Tinasoft.vn
+ */
 #ifndef __APP_H__
 #define __APP_H__
 
@@ -10,21 +13,29 @@
 #include "lcd1604.h"
 #include "sim7600e.h"
 #include "ledbutton.h"
+#include "MyJson.h"
 
+//  MyJsonClass MyJson;
+//  MyJson.encode("temperture", 5);
+//  MyJson.encode("humidity", 7);
+//  MyJson.encode("light", 8);
+//
+//  String message = MyJson.getStringEncode();
+//  Serial.println(message);
+//  char res[200];
+//  message.toCharArray(res, 200);
+//  Serial.println(message);
 
-// chua viet ham doc dien ap
 #define VOLTAGE     A12
 
 /*
  *  File này sẽ gọi các module vào nha
 */
-unsigned long t1, t2, t3;
 
-float SOH(void);
+float getSOH(unsigned long t1, unsigned long t2, float u, float i);
+float getVoltageOfCircuit(void);
+float getAmpleOfCircuit(void);
 
-// Depth of Discharge - Độ sâu phóng điện
-unsigned long DOD(void);
+unsigned long getDOD(unsigned long t1, unsigned long t2);
 
-float getVoltage(void);
-
-#endif
+#endif /* __APP_H__ */
