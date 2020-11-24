@@ -3,10 +3,11 @@
 
 #include <SPI.h>
 #include <SD.h>
+
 #include <Arduino.h>
 #include "AppDebug.h"
 
-// 53 la tren board - khi dung chip atmega2560 mach thuc y la 19
+// 53 là trên board - khi dùng chip atmega2560 mạch thực ý là 19
 #define SD_ChipSelectPin 53 
 
 class SDCard
@@ -23,7 +24,7 @@ class SDCard
     void SD_removeDir(char *nameDir);
     void SD_makeDir(char *nameDir);
     int  SD_position(void);
-    void SD_print(); // myFile.print(5.68664,4) ghi duoc so float
+    void SD_print(); // myFile.print(5.68664,4) ghi được số float vào thẻ nhớ.
     void SD_println();
     void SD_seek(int pos);
     long SD_available();

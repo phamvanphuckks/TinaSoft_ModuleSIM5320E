@@ -1,4 +1,4 @@
-//Thermometer with thermistor
+// Thermometer with thermistor
 
 /*thermistor parameters:
  * RT0: 10 000 Ω
@@ -25,7 +25,7 @@ void setup() {
 }
 
 void loop() {
-  VRT = analogRead(A0);              //Acquisition analog value of VRT
+  VRT = analogRead(A1);              //Acquisition analog value of VRT
   Serial.print("VRT:");
   Serial.print("\t");
   Serial.println(VRT);

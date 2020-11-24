@@ -3,9 +3,6 @@
 
 SimpleKalmanFilter fillterACS(1, 1, 0.01);
 
-/*
- * nên sd kalman
-*/
 ACS712_Sensor::ACS712_Sensor(float vcc, float sensitivity, float quiescent_Output_voltage, float magnetic_offset_error)
 {
   this->_vcc = vcc;

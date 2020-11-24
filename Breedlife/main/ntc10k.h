@@ -7,8 +7,9 @@
 #define NTC10kpin1  A0
 #define NTC10kpin2  A1
 
-/*thermistor parameters:
- * RT0: 10 000 Ω
+/*
+ * thermistor parameters:
+ * RT0: 10000 Ω
  * B: 3977 K +- 0.75%
  * T0:  25 C
  * +- 5%

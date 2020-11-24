@@ -15,7 +15,6 @@ float NTC10kSensor::NTC10k_ReadTemperture(int pinNTC10k)
   _Tc = (1 / ((_ln / B) + (1 / _T0))); //Temperature from thermistor
   _Tc = _Tc - 273.15;                 //Conversion to Celsius
  
-  ECHOLN("tempertre");
-  ECHOLN(_Tc);
+  ECHOLN("temperature: "+String(_Tc)+"*C");
   return _Tc;
 }

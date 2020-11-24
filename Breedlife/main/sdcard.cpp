@@ -6,7 +6,7 @@
 void SDCard::SD_Init(void)
 {
   if (!SD.begin(SD_ChipSelectPin)) {
-   ECHOLN("initialization failed! - kiem tra lai chan SD_ChipSelectPin - 53 on board, 19-on chip");
+    ECHOLN("initialization failed! - kiem tra lai chan SD_ChipSelectPin - 53 on board, 19-on chip");
   }
   else
   {
@@ -75,6 +75,7 @@ void SDCard::SD_removeFile(char *nameFile)
     ECHOLN("remove File Failed!!");    
   }
 }
+
 /*
  * Remove a directory from the SD card. The directory must be empty.
 */
@@ -93,6 +94,7 @@ void SDCard::SD_makeDir(char *nameDir)
     ECHOLN("make Dirctory Failed!");    
   }  
 }
+
 /*
  * get the current position within the file (i.e. the location to which the next byte will be read from or written to).
 */

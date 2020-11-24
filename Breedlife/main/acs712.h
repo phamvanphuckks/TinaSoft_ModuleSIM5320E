@@ -23,7 +23,7 @@
 // cách calibartion
 
 /* 
- *  P1(2.527, 0) : đo điện áp tại điểm Vout, không có tải => P1
+ * P1(2.527, 0) : đo điện áp tại điểm Vout, không có tải => P1
  * P2(2.687, 1.155) : dùng đồng hồ đo -> P2
  *  => sensitivity = V2-V1/I2-I1=2.687-2.527/1.155-0 = 0.139 V/A
 */

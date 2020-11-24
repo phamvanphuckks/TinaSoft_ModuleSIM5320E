@@ -1,18 +1,10 @@
 #include "sim7600e.h"
-//#include <SoftwareSerial.h>
 
-//#define SIM7600E_PWRKEY 8
-//#define SIM7600E_RST 4
-//#define SIM7600E_RX 17
-//#define SIM7600E_TX 16
+#define SIM7600E_PWRKEY 26
+#define SIM7600E_RST    27
+#define SIM7600E_POWER  28
 
-#define SIM7600E_SS Serial2
-
-#if defined(ARDUINO_ARCH_SAMD)
-#define DebugStream SERIAL_PORT_USBVIRTUAL 
-#else
-#define DebugStream Serial
-#endif
+#define SIM7600E_SS Serial1
 
 /*
   buffer serial max la 64 byte
@@ -23,11 +15,21 @@ SIM7600E::SIM7600E()
 {
   setUserAgent("Module SIM7600E");
   setHTTPSRedirect(0);
+  
+  pinMode(SIM7600E_POWER,  OUTPUT);
+  pinMode(SIM7600E_RST,    OUTPUT);
+  pinMode(SIM7600E_PWRKEY, OUTPUT);
 }
 
 boolean SIM7600E::setupSIM(long baud)
 {
   flushInput();
+  
+  // cấp nguồn cho module SIM - active high
+  digitalWrite(SIM7600E_POWER, HIGH);
+
+  // powerkey - active low
+  digitalWrite(SIM7600E_PWRKEY, LOW);
   
   if(!setBaud(baud)) 
     return false; 
@@ -43,13 +45,13 @@ boolean SIM7600E::setupSIM(long baud)
 
 void SIM7600E::rstSIM()
 {
-//  ECHOLN(F("rst begin"));
-//  digitalWrite(SIM7600E_RST, LOW);
-//  delay(500);
-//  digitalWrite(SIM7600E_RST, HIGH);
-//  delay(500);
-//  ECHOLN("rst ok");
-//  delay(500);
+  ECHOLN(F("rst begin"));
+  digitalWrite(SIM7600E_RST, LOW);
+  delay(500);
+  digitalWrite(SIM7600E_RST, HIGH);
+  delay(500);
+  ECHOLN("rst ok");
+  delay(500);
 }
 
 boolean SIM7600E::getModemInfo()
@@ -113,7 +115,7 @@ boolean SIM7600E::setBaud(long baud)
     SIM7600E_SS.println("AT\r\n");
     readline(1000);
     if(strcmp(replybuffer, ok_reply) == 0) break;
-    //ECHOLN(baudrate_array[i]);
+    ECHOLN(baudrate_array[i]);
     delay(100);
   }
   sprintf(tempdata,"AT+IPR=%d\r\n", baud);
