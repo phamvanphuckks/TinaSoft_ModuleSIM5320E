@@ -27,8 +27,6 @@
 #define BUZZON       digitalWrite(BUZZ, HIGH);
 #define BUZZOFF      digitalWrite(BUZZ, LOW);
 
-extern volatile bool  BT_UP_Flag, BT_DOWN_Flag, BT_BACK_Flag, BT_ENTER_Flag; 
-
 void Init_Buzz(void);
 void Init_LED(void);
 void Init_Button(void);

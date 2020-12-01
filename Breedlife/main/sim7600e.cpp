@@ -23,13 +23,19 @@ SIM7600E::SIM7600E()
 
 boolean SIM7600E::setupSIM(long baud)
 {
-  flushInput();
+  digitalWrite(SIM7600E_PWRKEY, LOW);
+  digitalWrite(SIM7600E_POWER,  LOW);
+  delay(500);
   
   // cấp nguồn cho module SIM - active high
-  digitalWrite(SIM7600E_POWER, HIGH);
-
+  digitalWrite(SIM7600E_POWER,  HIGH);
+  digitalWrite(SIM7600E_PWRKEY, HIGH);
+  delay(500);
+  
   // powerkey - active low
   digitalWrite(SIM7600E_PWRKEY, LOW);
+  delay(1000);
+  digitalWrite(SIM7600E_PWRKEY, HIGH);
   
   if(!setBaud(baud)) 
     return false; 
@@ -51,7 +57,6 @@ void SIM7600E::rstSIM()
   digitalWrite(SIM7600E_RST, HIGH);
   delay(500);
   ECHOLN("rst ok");
-  delay(500);
 }
 
 boolean SIM7600E::getModemInfo()
@@ -63,6 +68,7 @@ boolean SIM7600E::getModemInfo()
   
   SIM7600E_SS.println(F("ATI\r\n"));
   readline(1000, true);
+  
   if(strstr(replybuffer, ok_reply))
   {
     ECHOLN(replybuffer);
@@ -86,7 +92,7 @@ boolean SIM7600E::setEcho(boolean status)
   ECHO(F("ATE"));
   ECHOLN(status);
 
-  if(status==true) SIM7600E_SS.println(F("ATE1\r\n"));
+  if(status == true) SIM7600E_SS.println(F("ATE1\r\n"));
   else  SIM7600E_SS.println(F("ATE0\r\n"));
 
   readline(1000, true);
@@ -115,7 +121,7 @@ boolean SIM7600E::setBaud(long baud)
     SIM7600E_SS.println("AT\r\n");
     readline(1000);
     if(strcmp(replybuffer, ok_reply) == 0) break;
-    ECHOLN(baudrate_array[i]);
+    //ECHOLN(baudrate_array[i]);
     delay(100);
   }
   sprintf(tempdata,"AT+IPR=%d\r\n", baud);

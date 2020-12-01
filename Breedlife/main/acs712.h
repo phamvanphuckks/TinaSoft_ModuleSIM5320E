@@ -15,10 +15,10 @@
 #define ACS9    A10
 #define ACS10   A11
 
-#define SEN     66.0
+#define SEN     66
 #define QV      0.5
 #define MOE     0.0 // sửa tham số này để bù lỗi lỗi giữa đồng hồ đo và giá trị đọc được <=> hiệu chỉnh, do thông số nhà sản xuất không chính xác.
-#define VIN     5.0
+#define VIN     5.0 // - *** 5.0V -3.3V
 
 // cách calibartion
 

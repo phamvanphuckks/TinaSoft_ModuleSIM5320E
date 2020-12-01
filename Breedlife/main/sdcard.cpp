@@ -50,6 +50,15 @@ void SDCard::SD_writeFile(char *nameFile, char *bufw)
   myFile.flush();
 }
 
+void SDCard::SD_print(float x)
+{
+  myFile.print(x);
+}
+
+void SDCard::SD_println(float x)
+{
+  myFile.println(x);
+}
 /*
  * Read from the file.
  * Returns
@@ -63,6 +72,23 @@ void SDCard::SD_readFile(char *bufr, int len)
     ECHOLN("read file error!"); 
   }
   bufr[len]='\0';
+}
+
+char SDCard::SD_readFile()
+{
+  return myFile.read();
+}
+void SDCard::SD_readFile(float *x)
+{
+  *x = myFile.parseFloat(SKIP_ALL);
+}
+/*
+ * read data until 'c'
+*/
+void SDCard::SD_readFile(char c, char *bufr, int len)
+{
+  myFile.readBytesUntil(c, bufr, len);
+  ECHOLN(bufr);
 }
 
 /*
@@ -114,11 +140,16 @@ void SDCard::SD_seek(int pos)
   }
 }
 
+byte SDCard::SD_peek(void)
+{
+  return myFile.peek();
+}
+
 /*
  * Check if there are any bytes available for reading from the file.
  * Returns the number of bytes available (int)
 */
-long SDCard::SD_available()
+int SDCard::SD_available()
 {
   return this->myFile.available();
 }
@@ -129,4 +160,35 @@ long SDCard::SD_available()
 void SDCard::SD_getNameFile(char *nameFile)
 {
   strcpy(nameFile, this->myFile.name());
+}
+
+/*
+ * get type data
+*/
+byte SDCard::readByte() {
+    return myFile.read();
+}
+
+short SDCard::readShort() {
+    short data;
+    myFile.read((uint8_t *)&data, sizeof(short));
+    return data;
+}
+
+int SDCard::readInt() {
+    int data;
+    myFile.read((uint8_t *)&data, sizeof(int));
+    return data;
+}
+
+long SDCard::readLong() {
+    long data;
+    myFile.read((uint8_t *)&data, sizeof(long));
+    return data;
+}
+
+float SDCard::readFloat() {
+    float data;
+    myFile.read((uint8_t *)&data, sizeof(float));
+    return data;
 }

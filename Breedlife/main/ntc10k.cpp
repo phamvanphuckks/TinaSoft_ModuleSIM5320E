@@ -8,7 +8,7 @@ NTC10kSensor::NTC10kSensor()
 float NTC10kSensor::NTC10k_ReadTemperture(int pinNTC10k)
 {
   _Vo = analogRead(pinNTC10k);
-  _VRT = (5.00 / 1023.00) * _Vo;      //Conversion to voltage
+  _VRT = (5.0 / 1023.00) * _Vo;          //Conversion to voltage ***** 5V- 3.3V
   _VR = VCC - _VRT;
   _RT = _VRT / (_VR / R);               //Resistance of RT
   _ln = log(_RT / RT0);

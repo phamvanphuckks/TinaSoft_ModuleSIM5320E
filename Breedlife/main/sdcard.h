@@ -7,8 +7,11 @@
 #include <Arduino.h>
 #include "AppDebug.h"
 
-// 53 là trên board - khi dùng chip atmega2560 mạch thực ý là 19
 #define SD_ChipSelectPin 53 
+
+#define FILE_WRITEF (O_WRITE | O_READ | O_CREAT) // enable using fseek()
+#define FILE_APPEND ((FILE_WRITE) | O_APPEND)
+
 
 class SDCard
 {
@@ -20,15 +23,25 @@ class SDCard
     void SD_closeFile(char *nameFile);
     void SD_writeFile(char *nameFile, char *bufw); // ghi vao so float => myFile.print();
     void SD_readFile(char *bufr, int len);
+    void SD_readFile(float *x);
+    void SD_readFile(char c, char *bufr, int len);
+    char SD_readFile();
     void SD_removeFile(char *nameFile);
     void SD_removeDir(char *nameDir);
     void SD_makeDir(char *nameDir);
     int  SD_position(void);
-    void SD_print(); // myFile.print(5.68664,4) ghi được số float vào thẻ nhớ.
-    void SD_println();
+    void SD_print(float x); // myFile.print(5.68664,4) ghi được số float vào thẻ nhớ.
+    void SD_println(float x);
     void SD_seek(int pos);
-    long SD_available();
+    byte SD_peek(void);
+    int SD_available();
     void SD_getNameFile(char *nameFile);
+    
+    byte readByte();
+    short readShort();
+    int readInt();
+    long readLong();
+    float readFloat();
   private:
     File myFile;
 };

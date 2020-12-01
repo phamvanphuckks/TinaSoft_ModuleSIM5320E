@@ -7,9 +7,9 @@ void Init_Buzz(void)
 
 void Init_LED(void)
 {
-  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_RED,    OUTPUT);
   pinMode(LED_YELLOW, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_GREEN,  OUTPUT);
 
   pinMode(LED_R, OUTPUT);
   pinMode(LED_G, OUTPUT);
@@ -40,10 +40,7 @@ void Init_Button(void)
   pinMode(BT_UP, INPUT_PULLUP);
   pinMode(BT_ENTER, INPUT_PULLUP);
 
-//  pinMode(BT_DOWN, INPUT_PULLUP); PE6
-//  pinMode(BT_BACK, INPUT_PULLUP); PE7
-
-  // PE6, PE7 - input
+  // BT_DOWN, BT_BACK - input
   DDRE &= ~(1 << DDE7);
   DDRE &= ~(1 << DDE6);
   // pull-up

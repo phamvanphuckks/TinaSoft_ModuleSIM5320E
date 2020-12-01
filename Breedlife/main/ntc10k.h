@@ -19,9 +19,8 @@
 #define RT0 10000.0   // Ω
 #define B 3977      // K
 
-#define VCC 5.0    //Supply voltage
+#define VCC 5.0    //Supply voltage - ***** 5V- 3.3V
 #define R 10000.0  //R=10KΩ
-
 
 class NTC10kSensor
 {

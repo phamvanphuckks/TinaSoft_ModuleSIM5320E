@@ -10,7 +10,7 @@
 #include <NewSoftSerial.h>
 #endif
 
-#define TIMEOUT_MS 1000
+#define TIMEOUT_MS 100
 #define ok_reply  "OK"
 
 #define HTTP_GET   0
@@ -32,8 +32,8 @@ class SIM7600E{
     boolean HTTP_init();
     boolean HTTP_term();
     boolean HTTP_para(const char* parameterTag, const char* parameterVaule);
-    boolean HTTP_data(const char* data, uint32_t maxTime=1000);
-    boolean HTTP_action(uint8_t method, int32_t timeout=1000);
+    boolean HTTP_data(const char* data, uint32_t maxTime=100);
+    boolean HTTP_action(uint8_t method, int32_t timeout=100);
     boolean HTTP_readall(uint16_t datalen);
     
     // HTTP high level interface
@@ -50,7 +50,7 @@ class SIM7600E{
     uint16_t readRaw(uint16_t b);
     uint8_t  readline(uint16_t timeout = TIMEOUT_MS, boolean multiline = false);
     uint8_t  getReply(const char *send, uint16_t timeout = TIMEOUT_MS);
-    boolean  expectReply(const char* reply, uint16_t timeout = 1000);
+    boolean  expectReply(const char* reply, uint16_t timeout = 100);
     boolean  sendCheckReply(const char* send, const char *reply, uint16_t timeout = TIMEOUT_MS);
     boolean  parseReply(const char* toreply, char divider);
     

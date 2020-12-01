@@ -1,7 +1,7 @@
 #include "acs712.h"
 #include <SimpleKalmanFilter.h>
 
-SimpleKalmanFilter fillterACS(1, 1, 0.01);
+SimpleKalmanFilter* fillterACS = (SimpleKalmanFilter*)malloc(sizeof(SimpleKalmanFilter) * 11);
 
 ACS712_Sensor::ACS712_Sensor(float vcc, float sensitivity, float quiescent_Output_voltage, float magnetic_offset_error)
 {
@@ -9,11 +9,16 @@ ACS712_Sensor::ACS712_Sensor(float vcc, float sensitivity, float quiescent_Outpu
   this->_sensitivity = sensitivity;
   this->_quiescent_Output_voltage = quiescent_Output_voltage;
   this->_magnetic_offset_error = magnetic_offset_error;
+
+  for (int index = 0; index < 10; index++) 
+  {
+    fillterACS[index] = SimpleKalmanFilter(1, 1, 0.001);
+  }
 }
 
 float ACS712_Sensor::getCurrentAverage(int _vpin, int i)
 {
-  float sum = 0, average;
+  float sum = 0, average = 0;
 
   for(int index = 0; index < i; index++)
   {
@@ -36,9 +41,8 @@ float ACS712_Sensor::readCurrent(int _vpin)
   const float QOV    = this->_quiescent_Output_voltage * this->_vcc;// set quiescent Output voltage for selected model
   
   float voltage;// internal variable for voltage
-  float voltageOut  = fillterACS.updateEstimate(analogRead(_vpin));
+  float voltageOut  = fillterACS[_vpin-56].updateEstimate(analogRead(_vpin));
   float voltage_raw =   (5.0 / 1023.0)* voltageOut;// Read the voltage from sensor
-  //float voltage_raw =   (5.0 / 1023.0)* voltageOut;// Read the voltage from sensor
   // quá trình xả từ accuy diễn ra Ip+ -> Ip- : 0-(+max)
   // kiểm tra đang sạc không
   if(voltage_raw > QOV + OFFSET_SEN)
@@ -83,6 +87,8 @@ void ACS712_Sensor::debug(int _vpin)
   ECHOLN("Readings....");
   ECHO("\tInput Pin: ");
   ECHOLN(_vpin);
+  ECHO("\tAnalog: ");
+  ECHOLN(analogRead(_vpin));
   ECHO("\tVoltage: ");
   Serial.print(analogRead(_vpin) * 5.0 / 1023.0, 3);
   ECHOLN(" V");
