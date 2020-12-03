@@ -5,8 +5,8 @@
 #define __APP_H__
 
 #include <Arduino.h>
-
 #include <EEPROMex.h>
+
 #include "acs712.h"
 #include "ds1307.h"
 #include "ntc10k.h"
@@ -16,6 +16,7 @@
 #include "ledbutton.h"
 #include "timer.h"
 
+/*address EEPROM*/
 #define addrPosDATA   0
 #define addrPosBACKUP 4
 #define addrLLVD      8
@@ -26,6 +27,7 @@
 #define T1 1
 #define T2 2
 
+/*lcd 1604*/
 #define LCD_POWER 22
 // kí tự mũi tên ->
 const byte iArrow[8] = { B00000, B00100, B00110, B11111, B00110, B00100, B00000, B00000 };
@@ -33,12 +35,23 @@ const byte ARROW = 0;
 
 typedef enum {SET = 1, CLEAR = !SET} STT;
 
-extern bool lcd_Home_Flag, lcd_Menu_Flag, lcd_Rec_Flag, lcd_Batt_Flag, lcd_LLVD_Flag;
-extern int pos_Menu, pos_Rec, pos_Batt, pos_PC;
-extern bool Battery_Flag;
-extern int LLVD_value;
-extern float offset_LLVD;
+enum lcd1604Flag {
+  HOME_Flag   = 1,
+  MENU_Flag   = 2,
+  REC_Flag    = 4,
+  BAT_Flag    = 8,
+  LLVD_Flag   = 16
+};
+extern uint8_t lcdFlag;
+
+extern int pos_Menu, pos_Rec, pos_Batt;
+extern float LLVD_value, offset_LLVD;
 extern uint32_t INDEX_DATA, INDEX_BACKUP;
+extern float Psum;
+
+
+extern bool Battery_Flag;
+
 
 typedef struct Data { 
       char url[50];        
@@ -79,7 +92,6 @@ void Calulation_SOH_DOD(void);
 /*
  * lcd1604
  */
-void LCD_displayACS(uint8_t ACSx);
 void LCD_home(void);
 void LCD_LLVD(float offset);
 void LCD_battery(uint8_t indexBat);
@@ -91,11 +103,11 @@ void move_up();
 void move_down();
 void move_back();
 void move_enter();
+/*end-lcd1604*/
 
 /*
  * DS1307
 */
-
 void DS1307_getTime(uint8_t);
 
 /*

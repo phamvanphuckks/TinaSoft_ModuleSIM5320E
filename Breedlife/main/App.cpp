@@ -252,14 +252,15 @@ void Calulation_SOH_DOD(void)
   }  
 }
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
 /*
  * LCD1604
  * column, row : 0->n-1.
 */
 void LCD_home(void)
 {
-  float voltage = 0 , iload = 0, ibattery = 0;
-  char t_data[20];
+  float voltage = 0.0, iload = 0.0, ibattery = 0.0;
+  char t_data[30];
 
   voltage = getVoltageOfCircuit();
   
@@ -268,7 +269,7 @@ void LCD_home(void)
     iload = 0;
     ibattery = ACS712.getAmpleOfCircuit();
   }
-  else if(getIsCharging()==DISCHARGE)
+  else if(getIsCharging() == DISCHARGE)
   {
     iload = ACS712.getAmpleOfCircuit();
     ibattery = 0;   
@@ -284,20 +285,15 @@ void LCD_home(void)
   DS1307.RTC_getDate(t_data);
   LDC1604.print(t_data);
   LDC1604.setCursor(0, 1);
-  LDC1604.print("V:");
-  LDC1604.print(voltage);
+  LDC1604.print("V:" + String(voltage));
   LDC1604.setCursor(10, 1);
-  LDC1604.print("Tempe:");
-  LDC1604.print(NTC10k.NTC10k_ReadTemperture(NTC10kpin1));
+  LDC1604.print("Tempe:" + String(NTC10k.NTC10k_ReadTemperture(NTC10kpin1)));
   LDC1604.setCursor(18, 1);
   LDC1604.print("*C");
-  
   LDC1604.setCursor(0, 2);
-  LDC1604.print("Load: ");
-  LDC1604.print(iload);
+  LDC1604.print("Load:" + String(iload));
   LDC1604.setCursor(0, 3);
-  LDC1604.print("Battery: ");
-  LDC1604.print(ibattery);
+  LDC1604.print("Battery:" + String(ibattery));
 }
 
 void LCD_LLVD(float offset)
@@ -305,29 +301,28 @@ void LCD_LLVD(float offset)
   LLVD_value = EEPROM.readFloat(addrLLVD) + offset;
   LDC1604.clear();  
   LDC1604.setCursor(0, 0);
-  LDC1604.print("LLDV");
-  LDC1604.setCursor(8, 0);
+  LDC1604.print("LLVD");
+  LDC1604.setCursor(8, 1);
   LDC1604.print(LLVD_value);
 }
 
 void LCD_battery(uint8_t indexBat)
 {
-  // ACS712
-  float voltage = 0 , i = 0, imax = 0;
+  float voltage = 0.0 , i = 0.0, imax = 0.0;
   voltage = getVoltageOfCircuit();
-  i = ACS712.getCurrent((indexBat+55));
-  imax = 20;
+  i       = ACS712.getCurrent((indexBat + 55));
+  imax    = 20;
   char stt[] = "Normal";
   
   LDC1604.clear();  
   LDC1604.setCursor(0, 0);
-  LDC1604.print("Battery"+String(indexBat));
+  LDC1604.print("Battery" + String(indexBat));
   LDC1604.setCursor(15, 1);
-  LDC1604.print("I:"+String(i)+"A");
+  LDC1604.print("I:" + String(i) + "A");
   LDC1604.setCursor(0, 1);
-  LDC1604.print("U:" + String(voltage)+"V");
+  LDC1604.print("U:" + String(voltage) + "V");
   LDC1604.setCursor(0, 2);
-  LDC1604.print("Imax:" + String(imax)+"A");
+  LDC1604.print("Imax:" + String(imax) + "A");
   LDC1604.setCursor(0, 3);
   LDC1604.print("Status:" + String(stt));
 }
@@ -338,11 +333,11 @@ void LCD_rectifiers(uint8_t indexRec, uint8_t voltage, uint8_t i, uint8_t imax, 
   LDC1604.setCursor(0, 0);
   LDC1604.print("Rectifiers"+String(indexRec));
   LDC1604.setCursor(15, 1);
-  LDC1604.print("I:"+String(i)+"A");
+  LDC1604.print("I:" + String(i) + "A");
   LDC1604.setCursor(0, 1);
-  LDC1604.print("U:" + String(voltage)+"V");
+  LDC1604.print("U:" + String(voltage) + "V");
   LDC1604.setCursor(0, 2);
-  LDC1604.print("Imax:" + String(imax)+"A");
+  LDC1604.print("Imax:" + String(imax) + "A");
   LDC1604.setCursor(0, 3);
   LDC1604.print("Status:" + String(stt));
 }
@@ -368,197 +363,143 @@ void LCD_arrow(uint8_t colum, uint8_t row)
 
 void move_up()
 {
-  if((BT_UP_Flag == 1) && (lcd_Menu_Flag == 1)) // up menu
+  if(BT_UP_Flag == 1)
   {
-    ++pos_Menu;
-    if(pos_Menu > 2)
-    { 
-      pos_Menu = 0;
-    }
-    ECHOLN("pos_Menu:"+String(pos_Menu));
-    switch(pos_Menu)
+    if(lcdFlag == REC_Flag) //up rectifiers
     {
-      case 0:
-        lcd_Home_Flag = 0;
-        lcd_Rec_Flag  = 1;
-        lcd_Batt_Flag = 0;
-        lcd_LLVD_Flag = 0;
-
-        // mũi tên
-        LCD_arrow(0, 1);
-        break;
-      case 1:
-        lcd_Home_Flag = 0;
-        lcd_Rec_Flag  = 0;
-        lcd_Batt_Flag = 1;
-        lcd_LLVD_Flag = 0;
-
-        // mũi tên
-        LCD_arrow(0, 2);
-        break;
-      case 2:
-        lcd_Home_Flag = 0;
-        lcd_Rec_Flag  = 0;
-        lcd_Batt_Flag = 0;
-        lcd_LLVD_Flag = 1; 
-        
-        // mũi tên
-        LCD_arrow(0, 3);     
-        break;
-      default:
-        break;
+      ++pos_Rec;
+      if(pos_Rec > 9) pos_Rec = 0;
+      ECHOLN("pos_Rec:"+String(pos_Rec));
+      LCD_rectifiers(pos_Rec + 1, 8, 10, 30, "Normal");
     }
-    BT_UP_Flag = 0;
-  }
-  else if((BT_UP_Flag == 1) && (lcd_Rec_Flag == 1) && (lcd_Menu_Flag == 0)) // up rectifiers
-  {
-    ++pos_Rec;
-    
-    if(pos_Rec > 9)
+    else if(lcdFlag == BAT_Flag) //up battery
     {
-      pos_Rec = 0;
+      ++pos_Batt;
+      if(pos_Batt > 9)  pos_Batt = 0;
+      ECHOLN("pos_Batt:"+String(pos_Batt));
+      LCD_battery(pos_Batt + 1);
     }
-    ECHOLN("pos_Rec:"+String(pos_Rec));
-    LCD_rectifiers(pos_Rec+1, 8, 10, 30,"Normal");
-    BT_UP_Flag = 0;
-  }
-  else if((BT_UP_Flag == 1) && (lcd_Batt_Flag == 1) && (lcd_Menu_Flag == 0)) // up battery
-  {
-    ++pos_Batt;
-    if(pos_Batt > 9)
+    else if(lcdFlag == LLVD_Flag)//up LLVD
     {
-      pos_Batt = 0;
+      offset_LLVD += 0.1;
+      LCD_LLVD(offset_LLVD);
     }
-    ECHOLN("pos_Batt:"+String(pos_Batt));
-    LCD_battery(pos_Batt+1);
+    else if(lcdFlag & MENU_Flag) // up menu
+    {
+      ++pos_Menu;
+      if(pos_Menu > 2)  pos_Menu = 0;
+      ECHOLN("pos_Menu:"+String(pos_Menu));
+      switch(pos_Menu)
+      {
+        case 0:
+          lcdFlag = (REC_Flag|MENU_Flag);
+          ECHOLN("lcdFlag"+String(lcdFlag));
+          LCD_arrow(0, 1);
+          break;
+        case 1:
+          lcdFlag = (BAT_Flag|MENU_Flag);
+          ECHOLN("lcdFlag"+String(lcdFlag));          
+          LCD_arrow(0, 2);
+          break;
+        case 2:
+          lcdFlag = (LLVD_Flag|MENU_Flag);  
+          ECHOLN("lcdFlag"+String(lcdFlag));         
+          LCD_arrow(0, 3);     
+          break;
+        default:
+          break;
+      }
+    }
     BT_UP_Flag = 0;
   }
-  else if((BT_UP_Flag == 1) && (lcd_LLVD_Flag == 1) &&  (lcd_Menu_Flag == 0))
-  {
-    offset_LLVD += 0.1;
-    LCD_LLVD(offset_LLVD);
-  }
-  else if((BT_UP_Flag == 1))
+  else
   {
     BT_UP_Flag = 0;
-  }  
+  }
 }
 
 void move_down(void)
 {
-  // down
-  if((BT_DOWN_Flag == 1) && (lcd_Menu_Flag == 1)) //  down menu
+  if(BT_DOWN_Flag == 1)
   {
-    --pos_Menu;
-    if(pos_Menu < 0)
+    if(lcdFlag == REC_Flag) // down rectifiers
     {
-      pos_Menu = 2;
+      --pos_Rec;
+      if(pos_Rec < 0) pos_Rec = 9;
+      ECHOLN("pos_Rec:"+String(pos_Rec));
+      LCD_rectifiers(pos_Rec+1, 10, 20, 30, "Normal");
     }
-    ECHOLN("pos_Menu:"+String(pos_Menu));
-    switch(pos_Menu)
+    else if(lcdFlag == BAT_Flag)// down batteries
     {
-      case 0:
-        lcd_Home_Flag = 0;
-        lcd_Rec_Flag  = 1;
-        lcd_Batt_Flag = 0;
-        lcd_LLVD_Flag = 0;
-
-        // mũi tên
-        LCD_arrow(0, 1);
-        break;
-      case 1:
-        lcd_Home_Flag = 0;
-        lcd_Rec_Flag  = 0;
-        lcd_Batt_Flag = 1;
-        lcd_LLVD_Flag = 0;
-
-        // mũi tên
-        LCD_arrow(0, 2);
-        break;
-      case 2:
-        lcd_Home_Flag = 0;
-        lcd_Rec_Flag  = 0;
-        lcd_Batt_Flag = 0;
-        lcd_LLVD_Flag = 1;
-
-        // mũi tên
-        LCD_arrow(0, 3);
-        break;
-      default:
-        break;
+      --pos_Batt;
+      if(pos_Batt < 0)  pos_Batt = 9;
+      ECHOLN("pos_Batt:"+String(pos_Batt));
+      LCD_battery(pos_Batt+1);
+    }
+    else if(lcdFlag == LLVD_Flag) // down LLDV
+    {
+      offset_LLVD -= 0.1;
+      LCD_LLVD(offset_LLVD);
+    }
+    else if(lcdFlag & MENU_Flag) // down menu
+    {
+      --pos_Menu;
+      if(pos_Menu < 0) pos_Menu = 2;
+      ECHOLN("pos_Menu:"+String(pos_Menu));
+      switch(pos_Menu)
+      {
+        case 0:
+          lcdFlag = (MENU_Flag|REC_Flag);
+          ECHOLN("lcdFlag"+String(lcdFlag));
+          LCD_arrow(0, 1);
+          break;
+        case 1:
+          lcdFlag = (MENU_Flag|HOME_Flag);
+          ECHOLN("lcdFlag"+String(lcdFlag));
+          LCD_arrow(0, 2);
+          break;
+        case 2:
+          lcdFlag = (MENU_Flag|LLVD_Flag);
+          ECHOLN("lcdFlag"+String(lcdFlag));
+          LCD_arrow(0, 3);
+          break;
+        default:
+          break;
+      }
     }
     BT_DOWN_Flag = 0;
   }
-  else if((BT_DOWN_Flag == 1)  && (lcd_Rec_Flag == 1) && ((lcd_Menu_Flag == 0))) // down rectifiers
-  {
-    --pos_Rec;
-    if(pos_Rec < 0)
-    {
-      pos_Rec = 9;
-    }
-    ECHOLN("pos_Rec:"+String(pos_Rec));
-    LCD_rectifiers(pos_Rec+1, 10, 20, 30, "Normal");
-    BT_DOWN_Flag = 0;
-  }
-  else if((BT_DOWN_Flag == 1)  && (lcd_Batt_Flag == 1) && (lcd_Menu_Flag == 0))// down batteries
-  {
-    --pos_Batt;
-    if(pos_Batt < 0)
-    {
-      pos_Batt = 9;
-    }
-    
-    ECHOLN("pos_Batt:"+String(pos_Batt));
-    LCD_battery(pos_Batt+1);
-    BT_DOWN_Flag = 0;
-  }
-  else if((BT_DOWN_Flag == 1) && (BT_DOWN_Flag == 1) &&  (BT_DOWN_Flag == 0))
-  {
-    offset_LLVD -= 0.1;
-    LCD_LLVD(offset_LLVD);
-  }
-  else if((BT_DOWN_Flag == 1))
+  else
   {
     BT_DOWN_Flag = 0;
-  }  
+  }
 }
 
 void move_back(void)
 {
-  // back
-  if((BT_BACK_Flag == 1) && ((pos_PC != 0)))
+  if(BT_BACK_Flag == 1) 
   {
-    if(pos_PC == 2) // back  từ 2 - 1 - từ rectifier, battery, LLDV quay lại menu
+    if((lcdFlag == REC_Flag) || (lcdFlag == BAT_Flag) || (lcdFlag == LLVD_Flag))
     {
-      // đặt lại cờ
-      lcd_Home_Flag = 0;
-      lcd_Menu_Flag = 1;
-      lcd_Rec_Flag  = 1;
-      lcd_Batt_Flag = 0;
-      lcd_LLVD_Flag = 0;
+      // back  từ 2 - 1,  từ rectifier, battery, LLVD quay lại menu
+      lcdFlag = (MENU_Flag|REC_Flag); 
+      ECHOLN("lcdFlag"+String(lcdFlag));
 
-      // hiển thị menu + mũi tên
       LCD_menu();
       LCD_arrow(0, 1);     
-
+      
       // đặt lại chỉ mục 
       pos_Rec  = 0; 
       pos_Batt = 0;
       pos_Menu = 0;
-
-      // đưa PC về 1
-      pos_PC = 1;
+      
       offset_LLVD = 0;
     }
-    else if(pos_PC == 1) // từ menu quay về home
+    else if(lcdFlag & MENU_Flag) // từ menu quay về home
     {
-      // đặt lại cờ
-      lcd_Home_Flag = 1;
-      lcd_Menu_Flag = 0;
-      lcd_Rec_Flag  = 0;
-      lcd_Batt_Flag = 0;
-      lcd_LLVD_Flag = 0;
-
+      lcdFlag = HOME_Flag; 
+      ECHOLN("lcdFlag" + String(lcdFlag));
+      
       // đặt lại chỉ mục 
       pos_Rec  = 0; 
       pos_Batt = 0;
@@ -566,13 +507,10 @@ void move_back(void)
 
       // hiển thị home
       LCD_home();
-
-      // đưa PC về 0
-      pos_PC = 0;
     }    
     BT_BACK_Flag = 0;
   }
-  else if((BT_BACK_Flag == 1))
+  else
   {
     BT_BACK_Flag = 0;
   }  
@@ -580,64 +518,50 @@ void move_back(void)
 
 void move_enter(void)
 {
-  if((BT_ENTER_Flag == 1) && ((pos_PC == 0 ) || (pos_PC == 1)))
+  if(BT_ENTER_Flag == 1)
   {
-    //ECHOLN("BT_ENTER_Flag:"+String(BT_ENTER_Flag));
-    switch(pos_PC)
+    if(lcdFlag & MENU_Flag) // nếu đang ở Menu -> press enter/menu, vào 1 trong 3 submenu
     {
-      case 0: // vị trí home- nhấn enter/menu để vào menu
-        // hiển thị lcd + mũi tên
-        LCD_menu();
-        LCD_arrow(0, 1);
-        
-        // đặt cờ
-        lcd_Home_Flag = 0;
-        lcd_Menu_Flag = 1;
-        lcd_Rec_Flag  = 1;
-        lcd_Batt_Flag = 0;
-        lcd_LLVD_Flag = 0;
-
-        // đặt PC lên 1
-        pos_PC = 1;
-        ECHOLN("Menu");
-        break;
-      case 1: // vị trí menu - dịch chuyển tới các vị trí, nhấn enter/menu để vào từng phần riêng.
-        if(lcd_Rec_Flag == 1)
+      if(lcdFlag & REC_Flag) // rectifiers
+      {
+        lcdFlag = REC_Flag;
+        ECHOLN("lcdFlag"+String(lcdFlag));
+        LCD_rectifiers(pos_Rec+1, 10, 20, 30, "Normal");
+      }
+      else if(lcdFlag & BAT_Flag) // batteries 
+      {
+        lcdFlag = BAT_Flag;
+        ECHOLN("lcdFlag"+String(lcdFlag));
+        LCD_battery(pos_Batt+1);  
+      }
+      else if(lcdFlag & LLVD_Flag) // LLVD
+      {
+        lcdFlag = LLVD_Flag;
+        ECHOLN("lcdFlag"+String(lcdFlag));
+        if(offset_LLVD != 0) // submenu LLVD:  ấn enter/menu - save LLVD
         {
-          // hiển thị rect thứ  nhất
-          lcd_Rec_Flag  = 1;
-          LCD_rectifiers(1, 10, 20, 30, "Normal");
+          EEPROM.writeFloat(addrLLVD, (EEPROM.readFloat(addrLLVD)+offset_LLVD));
+          offset_LLVD = 0;
         }
-        if(lcd_Batt_Flag == 1)
-        {
-          //hiển thị batterry thứ nhất 
-          lcd_Batt_Flag = 1;
-          LCD_battery(1);
-        }
-        if(lcd_LLVD_Flag == 1)
-        {
-          lcd_LLVD_Flag = 1;
-          if(offset_LLVD != 0)
-          {
-            EEPROM.writeFloat(addrLLVD, (EEPROM.readFloat(addrLLVD)+offset_LLVD));
-            offset_LLVD = 0;
-          }
-          LCD_LLVD(offset_LLVD);
-        }
-        lcd_Home_Flag = 0;
-        lcd_Menu_Flag = 0;
-        
-        // đặt PC lên 2.
-        pos_PC = 2;
-        break;
+        LCD_LLVD(offset_LLVD);
+      }
+    }
+    else if(lcdFlag == HOME_Flag)// vị trí home - nhấn enter/menu để vào menu
+    {
+      LCD_menu();
+      LCD_arrow(0, 1);
+      lcdFlag = (MENU_Flag|REC_Flag); // vào menu và ấn menu lần nữa -> submenu: rectifiers
+      ECHOLN("Menu: lcdFlag"+String(lcdFlag));
     }
     BT_ENTER_Flag = 0;
   }
-  else if((BT_ENTER_Flag == 1))
+  else
   {
     BT_ENTER_Flag = 0;
   } 
 }
+/*end -lcd1604*/
+
 
 /*
  * DS1307

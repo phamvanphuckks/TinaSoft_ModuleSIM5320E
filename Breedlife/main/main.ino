@@ -3,10 +3,9 @@
 
 bool t0_Flag = 0, t1_Flag = 0, t2_Flag = 0;
 volatile bool BT_UP_Flag = 0, BT_DOWN_Flag = 0, BT_BACK_Flag = 0, BT_ENTER_Flag = 0; 
-bool lcd_Home_Flag = 0, lcd_Menu_Flag = 0, lcd_Rec_Flag = 0, lcd_Batt_Flag = 0, lcd_LLVD_Flag = 0;
-int pos_Menu = 0, pos_Rec = 0, pos_Batt = 0, pos_PC = 0;
-int LLVD_value = 0;
-float offset_LLVD = 0.0;
+int pos_Menu = 0, pos_Rec = 0, pos_Batt = 0;
+float LLVD_value = 0.0, offset_LLVD = 0.0;
+uint8_t lcdFlag = HOME_Flag;
 
 volatile uint8_t  SIM_Flag = 0;
 volatile uint16_t TIM_UpdateCurrent = 0;
@@ -27,28 +26,28 @@ void setup()
 void loop()
 {
 //  Calulation_SOH_DOD();
-//  
-//  /*
-//   * Xử lý LCD - button
-//  */
-//  move_up();
-//  move_down();
-//  move_back();
-//  move_enter();
-//  
-//  // 5s update - battery
-//  if((lcd_Batt_Flag == 1) && TIM_UpdateCurrent > 10)
-//  {
-//    LCD_battery(pos_Batt+1);
-//    TIM_UpdateCurrent = 0;
-//  }
-//  // 5s update - home
-//  if((lcd_Home_Flag == 1) && TIM_UpdateCurrent > 10)
-//  {
-//    LCD_home();
-//    TIM_UpdateCurrent = 0;
-//  }  
-//  
+  
+  /*
+   * Xử lý LCD - button
+  */
+  move_up();
+  move_down();
+  move_back();
+  move_enter();
+  
+  // 5s update - battery
+  if((lcdFlag == BAT_Flag) && TIM_UpdateCurrent > 10)
+  {
+    LCD_battery(pos_Batt+1);
+    TIM_UpdateCurrent = 0;
+  }
+  // 5s update - home
+  if((lcdFlag == HOME_Flag) && TIM_UpdateCurrent > 10)
+  {
+    LCD_home();
+    TIM_UpdateCurrent = 0;
+  }  
+ 
 //  /* 
 //   * module SIM7600E - 1p truy vấn lại
 //   */
