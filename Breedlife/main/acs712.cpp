@@ -35,21 +35,50 @@ float ACS712_Sensor::getCurrent(int _vpin)
   return this->_current;
 } 
 
+//float ACS712_Sensor::readCurrent(int _vpin)
+//{
+//  const float FACTOR = this->_sensitivity/1000;// set sensitivity for selected model - unit V
+//  const float QOV    = this->_quiescent_Output_voltage * this->_vcc;// set quiescent Output voltage for selected model
+//  
+//  float voltage;// internal variable for voltage
+//  float voltageOut  = fillterACS[_vpin-56].updateEstimate(analogRead(_vpin));
+//  float voltage_raw =   (5.0 / 1023.0)* voltageOut;// Read the voltage from sensor
+// 
+//  // quá trình xả từ accuy diễn ra Ip+ -> Ip- : 0-(+max)
+//  // kiểm tra đang sạc không
+//  if(voltage_raw > QOV + OFFSET_SEN)
+//  {
+//    this->_charging =  DISCHARGE;
+//  }
+//  else if(voltage_raw < QOV - OFFSET_SEN)
+//  {
+//    this->_charging =  CHARGE;
+//  }
+//  else
+//  {
+//    this->_charging =  NONE;
+//  }
+//  
+//  voltage =  voltage_raw - QOV;
+//  this->_outVoltage = voltage;
+//  
+//  this->_current = abs(voltage / FACTOR) - (this->_magnetic_offset_error/1000);
+//}
+
+
 float ACS712_Sensor::readCurrent(int _vpin)
 {
-  const float FACTOR = this->_sensitivity/1000;// set sensitivity for selected model - unit V
-  const float QOV    = this->_quiescent_Output_voltage * this->_vcc;// set quiescent Output voltage for selected model
-  
-  float voltage;// internal variable for voltage
-  float voltageOut  = fillterACS[_vpin-56].updateEstimate(analogRead(_vpin));
-  float voltage_raw =   (5.0 / 1023.0)* voltageOut;// Read the voltage from sensor
+  //float sample = 509.84;
+  float sample = 512.0;
+  float offset  = fillterACS[_vpin-56].updateEstimate(analogRead(_vpin)) - sample;
+  float current = abs(offset / 17.0);
+
   // quá trình xả từ accuy diễn ra Ip+ -> Ip- : 0-(+max)
-  // kiểm tra đang sạc không
-  if(voltage_raw > QOV + OFFSET_SEN)
+  if(offset > 515)
   {
     this->_charging =  DISCHARGE;
   }
-  else if(voltage_raw < QOV - OFFSET_SEN)
+  else if(offset < 505)
   {
     this->_charging =  CHARGE;
   }
@@ -57,21 +86,19 @@ float ACS712_Sensor::readCurrent(int _vpin)
   {
     this->_charging =  NONE;
   }
-  
-  voltage =  voltage_raw - QOV;
-  this->_outVoltage = voltage;
-  
-  this->_current = abs(voltage / FACTOR) - (this->_magnetic_offset_error/1000);
+
+  this->_current = current;
 }
 
 IsChargeStatus ACS712_Sensor::isCharging()
 {
+  this->readCurrent(ACS1); 
   return this->_charging;
 }
 
 float ACS712_Sensor::getAmpleOfCircuit(void)
 {
-  return (getCurrent(ACS1)+getCurrent(ACS2)+getCurrent(ACS3)+getCurrent(ACS4)+getCurrent(ACS5)+getCurrent(ACS6)+getCurrent(ACS7)+getCurrent(ACS8)+getCurrent(ACS9)+getCurrent(ACS10)); 
+  return (this->getCurrent(ACS1)+this->getCurrent(ACS2)+this->getCurrent(ACS3)+this->getCurrent(ACS4)+this->getCurrent(ACS5)+this->getCurrent(ACS6)+this->getCurrent(ACS7)+this->getCurrent(ACS8)+this->getCurrent(ACS9)+this->getCurrent(ACS10)); 
 }
 
 void ACS712_Sensor::debug(int _vpin)

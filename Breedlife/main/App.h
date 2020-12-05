@@ -20,12 +20,14 @@
 #define addrPosDATA   0
 #define addrPosBACKUP 4
 #define addrLLVD      8
+#define addrTemp      12
 
 #define VOLTAGE     A12
 
-#define T0 0
-#define T1 1
-#define T2 2
+#define T0  0
+#define T1  1
+#define T1D 2
+#define T2  3
 
 /*lcd 1604*/
 #define LCD_POWER 22
@@ -40,7 +42,8 @@ enum lcd1604Flag {
   MENU_Flag   = 2,
   REC_Flag    = 4,
   BAT_Flag    = 8,
-  LLVD_Flag   = 16
+  TEMP_Flag   = 16,
+  LLVD_Flag   = 32
 };
 extern uint8_t lcdFlag;
 
@@ -48,14 +51,12 @@ extern int pos_Menu, pos_Rec, pos_Batt;
 extern float LLVD_value, offset_LLVD;
 extern uint32_t INDEX_DATA, INDEX_BACKUP;
 extern float Psum;
-
-
 extern bool Battery_Flag;
 
-
-typedef struct Data { 
+typedef struct { 
       char url[50];        
-      char data[100];                
+      char data[100];   
+      char t[50];             
       float acs[11];
       float U;
       float V;     
@@ -76,7 +77,14 @@ void Led_Button_Buzz_Init();
 /*
  * ACS712
 */
-extern bool t0_Flag, t1_Flag, t2_Flag;
+enum SOHFlag {
+  T0_Flag = 1,
+  T1_Flag = 2,
+  T2_Flag = 4,
+  SOH_Flag = 8
+};
+extern uint8_t sohFlag;
+
 IsChargeStatus getIsCharging(void);
 
 unsigned long getTimeSOH(uint8_t t);

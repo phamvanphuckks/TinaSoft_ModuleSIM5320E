@@ -18,7 +18,7 @@
 #define SEN     66
 #define QV      0.5
 #define MOE     0.0 // sửa tham số này để bù lỗi lỗi giữa đồng hồ đo và giá trị đọc được <=> hiệu chỉnh, do thông số nhà sản xuất không chính xác.
-#define VIN     5.0 // - *** 5.0V -3.3V
+#define VIN     5.0 
 
 // cách calibartion
 
@@ -45,6 +45,7 @@ class ACS712_Sensor
     IsChargeStatus isCharging();
 
     unsigned int t0_h = 0, t0_m = 0, t0_s = 0, t1_h = 0, t1_m = 0, t1_s = 0, t2_h = 0, t2_m = 0, t2_s = 0;
+    unsigned int t1d_h = 0, t1d_m = 0, t1d_s = 0;
     unsigned int u_discharge, i_discharge;
   private:
     IsChargeStatus _charging;

@@ -9,7 +9,7 @@
 #include "ledbutton.h"
 
 extern volatile uint8_t  SIM_Flag;
-extern volatile uint16_t Sync_Flag;
+extern volatile uint16_t Sync_Flag, TIM_SOH_Flag;
 extern volatile uint16_t TIM_UpdateCurrent;
 extern volatile bool BT_UP_Flag, BT_DOWN_Flag, BT_BACK_Flag, BT_ENTER_Flag; 
 

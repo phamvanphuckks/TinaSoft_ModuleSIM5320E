@@ -1,26 +1,33 @@
 #include <Arduino.h>
 #include "App.h"
 
-bool t0_Flag = 0, t1_Flag = 0, t2_Flag = 0;
+extern uint8_t sohFlag = T0_Flag;
+float Psum = 0.0;
+
 volatile bool BT_UP_Flag = 0, BT_DOWN_Flag = 0, BT_BACK_Flag = 0, BT_ENTER_Flag = 0; 
 int pos_Menu = 0, pos_Rec = 0, pos_Batt = 0;
 float LLVD_value = 0.0, offset_LLVD = 0.0;
 uint8_t lcdFlag = HOME_Flag;
 
 volatile uint8_t  SIM_Flag = 0;
+volatile uint16_t TIM_SOH_Flag = 0;
 volatile uint16_t TIM_UpdateCurrent = 0;
 volatile uint16_t Sync_Flag = 0;
 uint32_t INDEX_DATA = 0, INDEX_BACKUP = 0;
+
+DataSIM *dataPackage = (DataSIM*)malloc(sizeof(DataSIM));
 
 void setup()
 {
   Serial.begin(9600);
 
-//  SIM7600E_Init(); // Module SIM
-//  LCD1604_Init(); // initial lcd
-//  Led_Button_Buzz_Init(); // LED-Buzz-Butotn
-//  DS1307_Init(); // RTC-DS1307
-//  SDCard_Init(); // SD-Card
+  SIM7600E_Init(); // Module SIM
+  DS1307_Init(); // RTC-DS1307
+  SDCard_Init(); // SD-Card
+  LCD1604_Init(); // initial lcd
+  Led_Button_Buzz_Init(); // LED-Buzz-Butotn
+
+  delay(5000);
 }
 
 void loop()

@@ -20,7 +20,7 @@ char DS1307Time::RTC_getTime(char* time)
 {
   this->RTC_Datetime = this->RTC.now();
   sprintf(time,"%0.2d:%0.2d:%0.2d", RTC_Datetime.hour(), RTC_Datetime.minute(), RTC_Datetime.second());
-  ECHOLN(time);
+  //ECHOLN(time);
 }
 
 void DS1307Time::RTC_getTime(int *t_hour, int *t_minute, int *t_second)
@@ -35,13 +35,13 @@ char DS1307Time::RTC_getDate(char* date)
 {
   this->RTC_Datetime = this->RTC.now();
   sprintf(date,"%0.2d/%0.2d/%d", RTC_Datetime.day(), RTC_Datetime.month(), RTC_Datetime.year());
-  ECHOLN(date);
+  //ECHOLN(date);
 }
 
 char DS1307Time::RTC_getDateTime(char* datetime)
 {
   this->RTC_Datetime = this->RTC.now();
   sprintf(datetime,"%0.2d:%0.2d:%0.2d-%0.2d/%0.2d/%d", RTC_Datetime.hour(), RTC_Datetime.minute(), RTC_Datetime.second(), RTC_Datetime.day(), RTC_Datetime.month(), RTC_Datetime.year());
-  ECHOLN(datetime);
+  //ECHOLN(datetime);
 }
   
