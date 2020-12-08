@@ -46,7 +46,7 @@ class ACS712_Sensor
 
     unsigned int t0_h = 0, t0_m = 0, t0_s = 0, t1_h = 0, t1_m = 0, t1_s = 0, t2_h = 0, t2_m = 0, t2_s = 0;
     unsigned int t1d_h = 0, t1d_m = 0, t1d_s = 0;
-    unsigned int u_discharge, i_discharge;
+    float u_discharge, i_discharge;
   private:
     IsChargeStatus _charging;
     float _vcc, _current, _outVoltage;

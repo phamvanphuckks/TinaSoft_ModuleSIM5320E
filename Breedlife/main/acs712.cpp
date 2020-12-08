@@ -12,7 +12,7 @@ ACS712_Sensor::ACS712_Sensor(float vcc, float sensitivity, float quiescent_Outpu
 
   for (int index = 0; index < 10; index++) 
   {
-    fillterACS[index] = SimpleKalmanFilter(1, 1, 0.001);
+    fillterACS[index] = SimpleKalmanFilter(1, 1, 0.01);
   }
 }
 
@@ -68,17 +68,19 @@ float ACS712_Sensor::getCurrent(int _vpin)
 
 float ACS712_Sensor::readCurrent(int _vpin)
 {
-  //float sample = 509.84;
-  float sample = 512.0;
-  float offset  = fillterACS[_vpin-56].updateEstimate(analogRead(_vpin)) - sample;
+  float sample = 509.84;
+  //float sample = 512.0;
+  float adc_raw = fillterACS[_vpin-56].updateEstimate(analogRead(_vpin));
+  //ECHOLN(adc_raw);
+  float offset  = adc_raw - sample;
   float current = abs(offset / 17.0);
-
+  ECHOLN("Vpin"+String(_vpin)+ "  "+ String(adc_raw));
   // quá trình xả từ accuy diễn ra Ip+ -> Ip- : 0-(+max)
-  if(offset > 515)
+  if(adc_raw > 512)
   {
     this->_charging =  DISCHARGE;
   }
-  else if(offset < 505)
+  else if(adc_raw < 508)
   {
     this->_charging =  CHARGE;
   }
@@ -98,7 +100,12 @@ IsChargeStatus ACS712_Sensor::isCharging()
 
 float ACS712_Sensor::getAmpleOfCircuit(void)
 {
-  return (this->getCurrent(ACS1)+this->getCurrent(ACS2)+this->getCurrent(ACS3)+this->getCurrent(ACS4)+this->getCurrent(ACS5)+this->getCurrent(ACS6)+this->getCurrent(ACS7)+this->getCurrent(ACS8)+this->getCurrent(ACS9)+this->getCurrent(ACS10)); 
+  float Isum = 0.0;
+  for(int i = 0 ; i < 10; i++)
+  {
+    Isum += this->getCurrent(i+56);
+  }
+  return Isum;
 }
 
 void ACS712_Sensor::debug(int _vpin)

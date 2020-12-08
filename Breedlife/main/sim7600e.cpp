@@ -17,25 +17,20 @@ SIM7600E::SIM7600E()
   setHTTPSRedirect(0);
   
   pinMode(SIM7600E_POWER,  OUTPUT);
-  pinMode(SIM7600E_RST,    OUTPUT);
-  pinMode(SIM7600E_PWRKEY, OUTPUT);
 }
 
 boolean SIM7600E::setupSIM(long baud)
 {
-  digitalWrite(SIM7600E_PWRKEY, LOW);
-  digitalWrite(SIM7600E_POWER,  LOW);
-  delay(500);
-  
+  ECHOLN("\tsetup SIM");
   // cấp nguồn cho module SIM - active high
   digitalWrite(SIM7600E_POWER,  HIGH);
-  digitalWrite(SIM7600E_PWRKEY, HIGH);
-  delay(500);
-  
+
   // powerkey - active low
+  pinMode(SIM7600E_PWRKEY, OUTPUT);
   digitalWrite(SIM7600E_PWRKEY, LOW);
   delay(1000);
-  digitalWrite(SIM7600E_PWRKEY, HIGH);
+  pinMode(SIM7600E_PWRKEY, INPUT);
+  delay(5000);
   
   if(!setBaud(baud)) 
     return false; 
@@ -115,13 +110,12 @@ boolean SIM7600E::setEcho(boolean status)
 boolean SIM7600E::setBaud(long baud)
 {
   flushInput();
-  for(int i=0; i<8; i++)
+  for(int i = 0; i < 8; i++)
   {
     SIM7600E_SS.begin(baudrate_array[i]);
     SIM7600E_SS.println("AT\r\n");
     readline(1000);
     if(strcmp(replybuffer, ok_reply) == 0) break;
-    //ECHOLN(baudrate_array[i]);
     delay(100);
   }
   sprintf(tempdata,"AT+IPR=%d\r\n", baud);
@@ -143,8 +137,9 @@ boolean SIM7600E::setBaud(long baud)
     SIM7600E_SS.begin(baud);
     return true;
   }
-  else
+  else{
     return false;
+  }
 }
 
 boolean SIM7600E::baudCheck()
@@ -198,7 +193,7 @@ boolean SIM7600E::HTTP_init()
   ECHOLN("AT+HTTPINIT");
 
   SIM7600E_SS.println("AT+HTTPINIT\r\n");
-  
+
   return expectReply(ok_reply);
 }
 
@@ -312,6 +307,17 @@ void SIM7600E::HTTP_GET_end(void)
 
 boolean SIM7600E::HTTP_POST_start(const char* url, const char* postData)
 {
+  flushInput();
+  ECHO(F("\tAVR--->SIM:\t"));
+  ECHOLN(F("AT+CREG?"));
+  
+  SIM7600E_SS.println(F("AT+CREG?\r\n"));
+  readline(1000, true);
+  ECHOLN(replybuffer);
+  ECHO(F("\tAVR<---SIM:\t"));
+  ECHOLN(ok_reply);
+  ECHOLN(F("\t----------------------------------"));
+  
   if (!HTTP_setup(url))
     return false;
 
@@ -322,7 +328,7 @@ boolean SIM7600E::HTTP_POST_start(const char* url, const char* postData)
   // HTTP POST
   if (!HTTP_action(HTTP_POST))
     return false;
-
+ 
   ECHO(F("\tStatus: "));
   ECHOLN(stt);
   ECHO(F("\tLen: "));
@@ -357,10 +363,8 @@ boolean SIM7600E::HTTP_setup(char *url)
 {
   // Handle any pending
   HTTP_term();
-  delay(1000);
   // Initialize and set parameters
-  if (!HTTP_init())
-    return false;
+  HTTP_init();
   if (!HTTP_para("URL", url))
     return false;
   if (!HTTP_para("UA", useragent))
@@ -382,7 +386,7 @@ void SIM7600E::flushInput()
 {
   // Read all available serial input to flush pending data.
   uint16_t timeoutloop = 0;
-  while (timeoutloop++ < 40)
+  while (timeoutloop++ < 100)
   {
     while (SIM7600E_SS.available())
     {
@@ -413,6 +417,8 @@ uint16_t SIM7600E::readRaw(uint16_t b)
 
 uint8_t SIM7600E::readline(uint16_t timeout, boolean multiline)
 {
+  unsigned long time1 = 0;
+  unsigned long time2 = 0;
   uint16_t replyidx = 0;
   while (timeout--)
   {
@@ -446,6 +452,10 @@ uint8_t SIM7600E::readline(uint16_t timeout, boolean multiline)
       //ECHOLN(F("TIMEOUT"));
       break;
     }
+//    while ( (unsigned long) (millis() - time1) < 1 )
+//    {
+//      time1 = millis();
+//    }
     delay(1);
   }
   replybuffer[replyidx] = 0; // null term

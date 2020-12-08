@@ -13,14 +13,16 @@ void DS1307Time::RTC_Init(void)
   }
   
   this->RTC.adjust(DateTime(F(__DATE__), F(__TIME__))); // get time from PC- thời gian lần lưu file gần nhất 
-  //this->RTC.adjust(DateTime(2014, 1, 21, 3, 0, 0)); // manual 
+  ECHOLN(F(__DATE__));
+  ECHOLN(F(__TIME__));
+  //this->RTC.adjust(DateTime(2020, 12, 7, 3, 0, 0)); // manual 
 }
 
 char DS1307Time::RTC_getTime(char* time)
 {
   this->RTC_Datetime = this->RTC.now();
   sprintf(time,"%0.2d:%0.2d:%0.2d", RTC_Datetime.hour(), RTC_Datetime.minute(), RTC_Datetime.second());
-  //ECHOLN(time);
+//  ECHOLN(time);
 }
 
 void DS1307Time::RTC_getTime(int *t_hour, int *t_minute, int *t_second)

@@ -55,16 +55,16 @@ extern bool Battery_Flag;
 
 typedef struct { 
       char url[50];        
-      char data[100];   
+      char data[150];   
       char t[50];             
       float acs[11];
       float U;
-      float V;     
+      float I;    
       float P; 
       float SOH;
       float DOD;                  
 } DataSIM;
-
+extern DataSIM *dataPackage;
 /*
  * Hàm khởi tạo các module
  */
@@ -138,9 +138,9 @@ float getTemperture(uint8_t ntc);
  * SIM7600E
 */
 bool SIM_POST_Data(char *url, char *data);
-bool SIM_UpDate(char *url, char *data);
-bool SIM_Synch(char *url, char *data);
-
+bool SIM_UpDate(uint16_t times);
+bool SIM_Synch(uint16_t times);
+void getData(DataSIM *data);
 /*
  * debug
  */

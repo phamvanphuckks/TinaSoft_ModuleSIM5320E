@@ -21,7 +21,8 @@ void SDCard::SD_Init(void)
 */
 void SDCard::SD_openFile(char *nameFile, byte method)
 {
-  this->myFile = SD.open(nameFile, method); 
+  this->myFile = SD.open(nameFile, method);
+  delayMicroseconds(4500); 
   if (this->myFile) {
     ECHOLN("open file done.");
   } else {  // if the file didn’t open, print an error:
@@ -35,7 +36,7 @@ void SDCard::SD_openFile(char *nameFile, byte method)
 void SDCard::SD_closeFile(char *nameFile)
 {
   this->myFile.close();
-  ECHOLN("close the file.");
+  //ECHOLN("close the file.");
 }
 
 /* Write data to the file.
@@ -45,6 +46,7 @@ void SDCard::SD_writeFile(char *nameFile, char *bufw)
 {
   if(myFile.write(bufw, strlen(bufw))==0)
   {
+    delayMicroseconds(4500);
     ECHOLN("Write to SD failed!");
   }
   myFile.flush();

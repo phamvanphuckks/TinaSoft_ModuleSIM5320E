@@ -13,8 +13,8 @@ void BT_Timer_Init(void)
   TCNT1 = 45412; // 300ms
   TIMSK1 = (1 << TOIE1); // overflow interrupt enable
   sei(); // cho phép ngắt toàn cục
-  
 }
+
 void SIM_Timer_Init(void)
 {
   /*Reset Timer/Counter5 */
@@ -58,6 +58,6 @@ ISR (TIMER5_OVF_vect)
   SIM_Flag++;
   Sync_Flag++;
   TIM_SOH_Flag++;
-  TIM_UpdateCurrent++;
+  TIM_UpdateLCD++;
   TCNT5 = 49150; // 1s
 }

@@ -3,6 +3,7 @@
  */
 #include "App.h"
 
+// object
 ACS712_Sensor ACS712(VIN, SEN, QV, MOE);
 
 LDC1604Display LDC1604(0x20, 20, 4);
@@ -14,27 +15,51 @@ DS1307Time DS1307;
 SDCard  SDMemory;
 
 SIM7600E  SIM;
+//end-object
+
+// variable, flag
+uint8_t sohFlag = T0_Flag;
+volatile uint16_t TIM_SOH_Flag = 0;
+float Psum = 0.0;
+
+volatile uint16_t  SIM_Flag = 0;
+volatile uint16_t Sync_Flag = 0;
+DataSIM *dataPackage = (DataSIM*)malloc(sizeof(DataSIM));
+
+volatile bool BT_UP_Flag = 0, BT_DOWN_Flag = 0, BT_BACK_Flag = 0, BT_ENTER_Flag = 0; 
+int pos_Menu = 0, pos_Rec = 0, pos_Batt = 0;
+float LLVD_value = 0.0, offset_LLVD = 0.0;
+uint8_t lcdFlag = HOME_Flag;
+
+volatile uint16_t TIM_UpdateLCD = 0;
+uint32_t INDEX_DATA = 0, INDEX_BACKUP = 0;
+// end - variable, flag
 
 /*
  * hàm khởi tạo các module
 */
 void LCD1604_Init()
 {
-  LDC1604.init();                    
-  LDC1604.setBacklight(true); 
-
   // bật đèn nền
   pinMode(LCD_POWER, OUTPUT);
   digitalWrite(LCD_POWER, HIGH);
+  delayMicroseconds(4500);
+  LDC1604.init(); 
+  delayMicroseconds(4500);                  
+  LDC1604.setBacklight(true); 
+  delayMicroseconds(4500);
   // Tạo mũi tên
   LDC1604.createChar(ARROW, iArrow);
+  delayMicroseconds(4500);
   // Khởi tạo home
   LCD_home();
 }
 
 void DS1307_Init()
 {
+//  char s[5];
   DS1307.RTC_Init();
+//  DS1307.RTC_getTime(s);
 }
 
 void SDCard_Init()
@@ -42,14 +67,11 @@ void SDCard_Init()
   SDMemory.SD_Init();
   // get pos
   INDEX_DATA   = EEPROM.readLong(addrPosDATA);
-  delay(5);
   INDEX_BACKUP = EEPROM.readLong(addrPosBACKUP);
-  delay(5);
 }
 
 void SIM7600E_Init()
 {
-  delay(5000);
   if(SIM.setupSIM(9600))
   { 
     ECHOLN(F("\t----------------------------------"));
@@ -83,19 +105,23 @@ IsChargeStatus getIsCharging(void)
 {
   return ACS712.isCharging();
 }
-// t(h)
+
+// t(s)
 unsigned long getTimeSOH(uint8_t t)
 {
   switch(t)
   {
+    case T0:
+      return ((ACS712.t0_h*60 + ACS712.t0_m)*60 + ACS712.t0_s);
+      break; 
     case T1:
-      return ((ACS712.t1_h*60 + ACS712.t1_m)*60 + ACS712.t1_s)/3600; 
+      return ((ACS712.t1_h*60 + ACS712.t1_m)*60 + ACS712.t1_s); 
       break;
     case T1D:
-      return ((ACS712.t1d_h*60 + ACS712.t1d_m)*60 + ACS712.t1d_s)/3600; 
+      return ((ACS712.t1d_h*60 + ACS712.t1d_m)*60 + ACS712.t1d_s); 
       break;
     case T2:
-      return ((ACS712.t2_h*60 + ACS712.t2_m)*60 + ACS712.t2_s)/3600;
+      return ((ACS712.t2_h*60 + ACS712.t2_m)*60 + ACS712.t2_s);
       break;
     default:
       break;
@@ -104,18 +130,29 @@ unsigned long getTimeSOH(uint8_t t)
 
 float getSOH(unsigned long t1, unsigned long t2)
 {
-  float Ft2 = 0, Ft1 = 0;
-  Ft2 = ACS712.u_discharge*ACS712.i_discharge*(t2*t2)/2;
-  Ft1 = ACS712.u_discharge*ACS712.i_discharge*(t1*t1)/2;
+  float Ft2 = 0.0, Ft1 = 0.0, F = 0.0;
+  t2 = t2-t1;
+  t1 = 1;
 
-  return (Ft2 - Ft1);
+  Ft2 = ACS712.u_discharge*ACS712.i_discharge*(t2);
+  Ft1 = ACS712.u_discharge*ACS712.i_discharge*(t1);
+    
+  ECHOLN("u_discharge: "+String(ACS712.u_discharge));
+  ECHOLN("i_discharge: "+String(ACS712.i_discharge));
+  ECHOLN("t1: "+String(t1));
+  ECHOLN("t2: "+String(t2));
+  ECHOLN("FT2: "+String(Ft2));
+  ECHOLN("FT1: "+String(Ft1));
+  
+  F = (Ft2 - Ft1)/3600;
+  ECHOLN(String(F)+": W/h");
+  return (Ft2 - Ft1)/3600; // wh
 }
 /*
  * Tính toán % soh -> lưu vào thẻ nhớ, hiển thị đèn
 */
 float getPercentSOH(unsigned long t1, unsigned long t2)
 {
-
 
 }
 
@@ -152,28 +189,26 @@ void getUIdischarge(void)
 
 void Calulation_SOH_DOD(void)
 {
-
-  // kiểm tra lại mấy điều kiện U.
   /* 
    * khi bộ sạc được cắm điện : bộ sạc vừa sạc cho accuy vừa cấp nguồn cho tải.
-   * Khi mà accuy đầy :  bộ sạc chỉ cung cấp cho tải <=> ACS712 đọc được 0A +- sai số 0.2A, U=48V.
-   * (getVoltage() ? 40.0) : //Đang cắm sạc
+   * Khi mà accuy đầy : bộ sạc chỉ cung cấp cho tải <=> ACS712 đọc được 0A +- sai số 0.2 A, U = 49V.
+   * (getVoltage() >=  53.0) : Đang cắm sạc  -- có 2 nguồn 49.0 V và 53 V <=> chênh áp lựa chọn 53.0V => getVoltage > 53.0V
    * (ACS712.getCurrent(ACS1) == 0.0) : mạch không sạc, không xả <=> đang cắm sạc, và bình accuy đầy.
   */  
-  if((sohFlag == T0_Flag) && (getIsCharging() == NONE) && (getVoltageOfCircuit() >= 40.0)) 
+  if((sohFlag == T0_Flag) && (getIsCharging() == NONE) && (getVoltageOfCircuit() >= 53.0)) 
   {
     ECHOLN("Phat hien mach khong sac, xa : t0");
     DS1307_getTime(T0);// t0 = timenow
     // ghi t0 vào thẻ nhớ
-
+    
     sohFlag = T1_Flag;
   }
 
   /*
    * Nếu mà phát hiện ra đang sạc đầy và nhận thấy quá trình xả từ accuy diễn ra Ip+ -> Ip- : 0-(+max)
-   * (getVoltageOfCircuit() ? 40.0) : //không cắm sạc, lúc này accuy xả cho tải.
+   * (getVoltageOfCircuit() <= 49.0) : không cắm sạc, lúc này accuy xả cho tải. -- có 2 nguồn 49.0 V và 53.0 V <=> chênh áp lựa chọn 49.0V => getVoltage <= 49.0V
   */
-  if((sohFlag == T1_Flag) && (getIsCharging() == DISCHARGE) && (getVoltageOfCircuit() >= 40.0))
+  if((sohFlag == T1_Flag) && (getIsCharging() == DISCHARGE) && (getVoltageOfCircuit() <= 49.0))
   {
     ECHOLN("Phat hien mach xa : t1");
     DS1307_getTime(T1);   // t1 = timenow
@@ -190,9 +225,10 @@ void Calulation_SOH_DOD(void)
   }
   /*
    * Nếu đang xả của quá trình đo thời gian xả đế tính SOH và DOD -> căm sạc vào , hủy bỏ lần tính toán đấy.
+   * Có 2 nguồn 49.0 V và 53.0 V <=> chênh áp lựa chọn 53.0V => getVoltage <= 53.0V
    * => không tính lần SOH, DOD đấy.
   */
-  if((sohFlag & T2_Flag) && (getIsCharging() == CHARGE) && (getVoltageOfCircuit() >= 40.0))
+  if((sohFlag & T2_Flag) && (getIsCharging() == CHARGE) && (getVoltageOfCircuit() >= 53.0))
   {
     ECHOLN("Phat hien mach xa, bi cam sac");
     Psum = 0.0;
@@ -201,7 +237,7 @@ void Calulation_SOH_DOD(void)
     sohFlag = T0_Flag;
   }
   
-  if((sohFlag & SOH_Flag) && (getIsCharging() == DISCHARGE) && (TIM_SOH_Flag == 60))
+  if((sohFlag & SOH_Flag) && (getIsCharging() == DISCHARGE) && (TIM_SOH_Flag == 5)) // 5s 
   {
     unsigned long t1 = 0, t2 = 0;
     
@@ -215,10 +251,10 @@ void Calulation_SOH_DOD(void)
     TIM_SOH_Flag = 0;
   }
   /*
-   * I = 0, U > 40(Vẫn nối với tải - tải với nguồn cấp cho mạch chung) => bình cạn I
+   * I = 0, U <= 40 (Vẫn nối với tải - tải với nguồn cấp cho mạch chung) => bình cạn I
    * Tính SOH và DOD
   */
-  if((sohFlag & SOH_Flag) && (getIsCharging() == NONE) && (getVoltageOfCircuit() >= 40))// bình cạn
+  if((sohFlag & SOH_Flag) && (getIsCharging() == NONE) && (getVoltageOfCircuit() <= 40.0))// bình cạn
   {
     ECHOLN("Phat hien mach xa het, tinh toan SOH, DOD: t2");
     unsigned long t1 = 0, t1d = 0,  t2 = 0;
@@ -241,10 +277,10 @@ void Calulation_SOH_DOD(void)
   }
 
   /*
-   * I=0, U<=40(tải rút ra - tải, nguồn cấp cho mạch chung) bình ko cạn, nhưng bị rút tải
+   * I=0, U>40(tải rút ra - tải, nguồn cấp cho mạch chung) bình ko cạn, nhưng bị rút tải
    * không tính gì cả, chỉ lưu lại giá trị t2 tính DOD
   */
-  else if((sohFlag & T2_Flag) && (getIsCharging() == NONE) && (getVoltageOfCircuit() < 40.0))
+  else if((sohFlag & T2_Flag) && (getIsCharging() == NONE) && (getVoltageOfCircuit() > 40.0))
   {
     ECHOLN("Phat hien mach xa het, nhung bi rut tai");
     unsigned long t1d = 0, t2 = 0;
@@ -267,7 +303,7 @@ void Calulation_SOH_DOD(void)
  * LCD1604
  * column, row : 0->n-1.
 */
-void LCD_home(void)
+void LCD_home()
 {
   float voltage = 0.0, iload = 0.0, ibattery = 0.0;
   char t_data[30];
@@ -308,7 +344,8 @@ void LCD_home(void)
 
 void LCD_LLVD(float offset)
 {
-  LLVD_value = EEPROM.readFloat(addrLLVD) + offset;
+  LLVD_value = EEPROM.readFloat(addrLLVD);
+  LLVD_value += offset;
   LDC1604.clear();  
   LDC1604.setCursor(0, 0);
   LDC1604.print("LLVD");
@@ -612,7 +649,7 @@ bool SDCard_saveSOH_DOD(char *namefile, float SOH, float DOD)
   // through the header fied
   while (SDMemory.SD_available()) 
   {   
-   char inputChar = SDMemory.SD_readFile(); // Gets one byte from serial buffer
+    char inputChar = SDMemory.SD_readFile(); // Gets one byte from serial buffer
     if (inputChar == '\n') //end of line (or 10)
     {
       break;
@@ -633,42 +670,32 @@ bool SDCard_getSOH_DOD(char *namefile, float *SOH, float *DOD)
   SDMemory.SD_closeFile(namefile);
 }
 // lưu thông tin vào thẻ nhớ
-bool SDCard_saveInfo(char *namefile)
+bool SDCard_saveInfo(char *namefile, DataSIM *data)
 {
-  char t[50]=" ";
-  float P = 0.0, U = 0.0, I = 0.0;
-  float SOH = 0.0, DOD = 0.0;
-  
-  //DS1307.RTC_getDateTime(t);
-  U = getVoltageOfCircuit();
-  I = ACS712.getAmpleOfCircuit();
-  
-  SDCard_getSOH_DOD("SOH_DOD.csv", &SOH, &DOD);
-  
-  SDMemory.SD_openFile(namefile, FILE_WRITE);
   //SDMemory.SD_writeFile(namefile, "STT,Time,U,I,I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,P,SOH,DOD\n");
+  SDMemory.SD_openFile(namefile, FILE_WRITE);
+
   SDMemory.SD_print(INDEX_DATA++);
-  
   SDMemory.SD_writeFile(namefile, ",");
-  SDMemory.SD_writeFile(namefile, t);
+  SDMemory.SD_writeFile(namefile, data->t);
   SDMemory.SD_writeFile(namefile, ",");
-  SDMemory.SD_print(U);
+  SDMemory.SD_print(data->U);
   SDMemory.SD_writeFile(namefile, ",");
-  SDMemory.SD_print(I);
+  SDMemory.SD_print(data->I);
   SDMemory.SD_writeFile(namefile, ",");
   
   for(int idex = 56; idex < 66; idex++)
   {
-    SDMemory.SD_print(ACS712.getCurrent(idex));
+    SDMemory.SD_print(data->acs[idex-56]);
     SDMemory.SD_writeFile(namefile, ",");
   }
   
-  SDMemory.SD_print(U*I);
+  SDMemory.SD_print(data->P);
   SDMemory.SD_writeFile(namefile, ",");
 
-  SDMemory.SD_print(SOH);
+  SDMemory.SD_print(data->SOH);
   SDMemory.SD_writeFile(namefile, ",");
-  SDMemory.SD_println(DOD);
+  SDMemory.SD_println(data->DOD);
   
   SDMemory.SD_closeFile(namefile);
 }
@@ -710,36 +737,63 @@ float getTemperture(uint8_t ntc)
 /*
  * SIM7600E
 */
+
+static void getData(DataSIM *data)
+{
+  strcpy(data->url, "http://admin.breedlife.com/api/v1/data");
+  DS1307.RTC_getDateTime(data->t);
+
+  for(int i = 0; i<10;i++)
+  {
+    data->acs[i] = ACS712.getCurrent(i+56);
+  }
+  data->U = getVoltageOfCircuit();
+  data->I = ACS712.getAmpleOfCircuit();
+  data->P = (data->U)*(data->I);
+  SDCard_getSOH_DOD("SOH_DOD.txt", &data->SOH, &data->DOD);
+
+  // về sau phải tính toán gói tin này.
+  strcpy(data->data, "{\"data\":[\"TR001\",[[8,8,8],[9,9,9],[9,9,9],[234,123,13],[11,123,112]],1,41.2,29,48.1,24,\"11/11/2011 11:11:11\"]}");
+}
+
 bool SIM_POST_Data(char *url, char *data)
 {
-  SIM.HTTP_POST_start(url, data);
+  return SIM.HTTP_POST_start(url, data);
 }
 
-bool SIM_UpDate(char *url, char *data)
+bool SIM_UpDate(uint16_t times)
 {
-  // lấy dữ liệu từ thẻ nhớ - bóc tách vv...
-  
-  // gui du lieu len server
-  if(!SIM_POST_Data(url, data)) 
+  if(SIM_Flag >= times)
   {
-      SDCard_saveInfo("backup.csv"); 
-      return false;
+    //getData(dataPackage);
+    strcpy(dataPackage->url, "http://admin.breedlife.com/api/v1/data");
+    strcpy(dataPackage->data, "{\"data\":[\"TR001\",[[8,8,8],[9,9,9],[9,9,9],[234,123,13],[11,123,112]],1,41.2,29,48.1,24,\"11/11/2011 11:11:11\"]}");
+    if(!SIM_POST_Data(dataPackage->url, dataPackage->data)) // gui du lieu len server
+    {
+        SDCard_saveInfo("backup.csv", dataPackage); 
+        SIM_Flag = 0;
+        return false;
+    }
+    ECHOLN("\tpush data to server");
+    SDCard_saveInfo("data.csv", dataPackage); // lưu vào thẻ nhớ
+    SIM_Flag = 0;
+    return true;
   }
-  // lưu vào thẻ nhớ
-  ECHOLN("\tpush data to server");
-  SDCard_saveInfo("data.csv"); 
-  return true;
 }
 
-bool SIM_Synch(char *url, char *data)
+bool SIM_Synch(uint16_t times)
 {
-  if(!SIM_POST_Data(url, data)) // đồng bộ không thành công 
+  if(Sync_Flag == times)
   {
-    return false;
-  }  
-  // đồng bộ - xóa hàng vừa đồng bộ
-  SDCard_clearRow("backup.csv");
-  return true;
+    //getData(dataPackage);
+    if(!SIM_POST_Data(dataPackage->url, dataPackage->data)) // đồng bộ không thành công 
+    {
+      return false;
+    }  
+    //SDCard_clearRow("backup.csv"); // đồng bộ - xóa hàng vừa đồng bộ
+    Sync_Flag = 0;
+    return true;
+  }
 }
 
 /* 
@@ -749,7 +803,6 @@ void ACS712_Debug(int ACSx)
 {
   ACS712.debug(ACSx); 
 }
-
 
 /*
  * back up - khi mất điện

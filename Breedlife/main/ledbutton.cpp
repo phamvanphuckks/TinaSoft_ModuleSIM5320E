@@ -3,6 +3,7 @@
 void Init_Buzz(void)
 {
   pinMode(BUZZ, OUTPUT);
+  //digitalWrite(BUZZ, LOW);
 }
 
 void Init_LED(void)
